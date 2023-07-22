@@ -109,7 +109,7 @@ $ pip install -r requirements.txt
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
   - [x] Full Parameter finetune
 - [x] Embedding support trainning(train,inference:models that can be loaded by the HuggingFaceEmbeddings)
-  - [x] [BERT,SENTENCEBERT,COSENT架构的模型](https://github.com/shibing624/text2vec#evaluation)
+  - [x] [Models constructed by BERT,SENTENCEBERT and COSENT](https://github.com/shibing624/text2vec#evaluation)
     - [x] [shibing624/text2vec-base-chinese](https://huggingface.co/shibing624/text2vec-base-chinese)
     - [x] [bert-base-uncased](https://huggingface.co/bert-base-uncased)
     - [x] [paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
