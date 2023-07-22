@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.realpath(__file__).split('caio_web')[0]+'caio_web')
+sys.path.append(os.path.realpath(__file__).split('LLM-Kit')[0]+'LLM-Kit')
 print(sys.path)
 import numpy as np
 import argparse
