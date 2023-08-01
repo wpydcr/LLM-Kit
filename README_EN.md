@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # install requirements
 $ pip install -r requirements.txt
 ```
- Or simply download：[Windows Env](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux Env]()。
+ Or simply download：[Windows Env](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux Env](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
  
  [GPU Driver](https://www.nvidia.cn/Download/index.aspx?lang=cn) and [cuda](https://developer.nvidia.com/cuda-toolkit-archive) is also required and should be pre-installed.
 
