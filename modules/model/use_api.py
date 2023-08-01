@@ -10,14 +10,16 @@ import json
 import zhipuai
 from modules.model.SparkApi import Spark_Api
 import dashscope
-from dashscope import Generation
+from dashscope import Generation,TextEmbedding
 from http import HTTPStatus
 import json
+from modules.model.prompt_generator import prompt_generator
 
+p_generator = prompt_generator()
 
 real_path = os.path.split(os.path.realpath(__file__))[0]
 
-def get_access_token(API_Key,Secret_Key):
+def get_ernie_access_token(API_Key,Secret_Key):
 
     url = f"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={API_Key}&client_secret={Secret_Key}"
     headers = {
@@ -41,102 +43,172 @@ class ali_api():
 
     def setv(self,api_key,top_p=0.8,top_k=100.0,kuake_search=False):
         if api_key == '':
-            raise gr.Error('请输入api_key')
+            return {
+                'status': -1,
+                'message': '请输入ali api key'
+            }
         dashscope.api_key = api_key
+        self.top_p = top_p
+        self.top_k = top_k
+        self.kuake_search = kuake_search
+        return {
+            'status': 0,
+            'message': '设置成功'
+        }
 
-    def get_ones_openai(self,message):
-        history = []
+
+    def get_ones(self,message):
         if type(message)==str:
             message = message.replace("\n", " ")
-            messages = message
+            messages,history = p_generator.generate_ali_prompt(message=message,history=[])
         else:
-            messages = message[:-1]['content']
-            for item in message:
-                if item['role']=='user':
-                    history.append({
-                        'user':item['content']
-                    })
-                elif item['role']=='assistant':
-                    history.append({
-                        'bot':item['content']
-                    })
+            messages = message[-1]['user']
+            history = message[:-1]
         try:
             response=Generation.call(
                 model='qwen-v1',
                 history=history,
-                prompt=messages
+                prompt=messages,
+                top_p=self.top_p,
+                top_k=self.top_k,
+                enable_search=self.kuake_search,
+                stream=False
                 )
             if response.status_code==HTTPStatus.OK:
-                return response.output.text
+                return {
+                    'status': 0,
+                    'message': response.output.text
+                }
             else:
-                return 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                return {
+                    'status': -1,
+                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                }
         except:
-            return '网络错误'
+            print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+            return {
+                    'status': -1,
+                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+            }
         
-    def get_ones_openai_stream(self,message):
+    def get_ones_stream(self,message):
         history = []
         if type(message)==str:
             message = message.replace("\n", " ")
-            messages = message
+            messages,history = p_generator.generate_ali_prompt(message=message,history=[])
         else:
-            messages = message[:-1]['content']
-            for item in message:
-                if item['role']=='user':
-                    history.append({
-                        'user':item['content']
-                    })
-                elif item['role']=='assistant':
-                    history.append({
-                        'bot':item['content']
-                    })
+            messages = message[-1]['user']
+            history = message[:-1]
         try:
             for response in Generation.call(
                 model='qwen-v1',
                 history=history,
                 prompt=messages,
+                top_p=self.top_p,
+                top_k=self.top_k,
+                enable_search=self.kuake_search,
                 stream=True
                 ):
-                yield response.output.text
+                if response.status_code==HTTPStatus.OK:
+                    yield {
+                        'status': 0,
+                        'message': response.output.text
+                    }
+                else:
+                    print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                    yield {
+                        'status': -1,
+                        'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                    }
         except:
-            return '网络错误'
+            print('Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+            yield {
+                    'status': -1,
+                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+            }
         
     def cut_memory(self):
+        if len(self.history.messages) == 0:
+            return {
+                'status': -1,
+                'message': '裁剪历史记录失败，历史记录为空'
+            }
         for _ in range(2):
             '''删除一轮对话'''
             first = self.history.messages.pop(0)
             print(f'删除上下文记忆: {first}')
+        return {
+            'status': 0,
+            'message': '裁剪历史记录成功'
+        }
 
-    def talk(self,message):
-        history = []
-        if type(message)==str:
-            message = message.replace("\n", " ")
-            messages = message
+    def talk(self,message,stream=False):
+        message = message.replace("\n", " ")
+        messages,history = p_generator.generate_ali_prompt(message=message,history=self.history.messages)
+        if stream:
+            total_reply = ''
+            try:
+                for response in Generation.call(
+                    model='qwen-v1',
+                    history=history,
+                    prompt=messages,
+                    top_p=self.top_p,
+                    top_k=self.top_k,
+                    enable_search=self.kuake_search,
+                    stream=True
+                    ):
+                    if response.status_code==HTTPStatus.OK:
+                        total_reply += response.output.text
+                        yield {
+                            'status': 0,
+                            'message': response.output.text
+                        }
+                    else:
+                        print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                        yield {
+                            'status': -1,
+                            'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_reply)
+            except:
+                print('Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                yield {
+                        'status': -1,
+                        'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                }
         else:
-            messages = message[:-1]['content']
-            for item in message:
-                if item['role']=='user':
-                    history.append({
-                        'user':item['content']
-                    })
-                elif item['role']=='assistant':
-                    history.append({
-                        'bot':item['content']
-                    })
-        try:
-            response=Generation.call(
-                model='qwen-v1',
-                history=history,
-                prompt=messages
-                )
-            if response.status_code==HTTPStatus.OK:
-                reply = response.output.text
-                self.history.messages.append(reply)
-                return reply
-            else:
-                return 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
-        except:
-            self.history.messages = self.history.messages[:-1]
-            return '网络错误'
+            try:
+                response=Generation.call(
+                    model='qwen-v1',
+                    history=history,
+                    prompt=messages,
+                    top_p=self.top_p,
+                    top_k=self.top_k,
+                    enable_search=self.kuake_search,
+                    stream=False
+                    )
+                if response.status_code==HTTPStatus.OK:
+                    self.history.messages.append(message)
+                    self.history.messages.append(response.output.text)
+                    yield {
+                        'status': 0,
+                        'message': response.output.text
+                    }
+                else:
+                    print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                    yield {
+                        'status': -1,
+                        'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                    }
+            except:
+                print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                yield {
+                        'status': -1,
+                        'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                }
         
     def clear_history(self):
         self.history = ChatMessageHistory()
@@ -149,12 +221,21 @@ class spark_api():
         pass
 
     def setv(self,spark_api_key=None,spark_api_secret=None,spark_appid=None,temperature=0.95,top_k=4,max_tokens=2048,gpt_url="ws://spark-api.xf-yun.com/v1.1/chat"):
-        if spark_api_key == '':
-            raise gr.Error('请输入spark_api_key')
-        if spark_api_secret == '':
-            raise gr.Error('请输入spark_api_secret')
         if spark_appid == '':
-            raise gr.Error('请输入spark_appid')
+            return {
+                'status': -1,
+                'message':'请输入spark appid'
+            }
+        if spark_api_key == '':
+            return {
+                'status': -1,
+                'message': '请输入spar api key'
+            }
+        if spark_api_secret == '':
+            return {
+                'status': -1,
+                'message':'请输入spark api secret'
+            }
         self.spark_api_key = spark_api_key
         self.spark_api_secret = spark_api_secret
         self.spark_appid = spark_appid
@@ -164,62 +245,136 @@ class spark_api():
         self.gpt_url = gpt_url
         self.spark_api = Spark_Api(self.spark_appid,self.spark_api_secret,self.spark_api_key,self.temperature,self.top_k,self.max_tokens,self.gpt_url)
         self.spark_api.create_ws()
+        return {
+            'status': 0,
+            'message': '设置成功'
+        }
 
-    def get_ones_openai(self,message):
+    def get_ones(self,message):
         if type(message)==str:
             message = message.replace("\n", " ")
-            messages = [{'role':'user','content':message}]
-        else:
-            messages=message
+            message = p_generator.generate_spark_prompt(message=message)
+        messages=message
         try:
             total_text = ''
-            for text in self.spark_api._call(messages):
-                total_text += text
-            return total_text
-        except:
-            return '网络错误'
+            for response in self.spark_api._call(messages):
+                if response['status'] == 0:
+                    text = response['message']
+                    total_text += text
+                elif response['status'] == -1:
+                    print(response['message'])
+                    return {
+                        'status': -1,
+                        'message': response['message']
+                    }
+            return {
+                'status': 0,
+                'message': total_text
+            }
+        except Exception as e:
+            return {
+                'status': -1,
+                'message': str(e)
+            }
         
-    def get_ones_openai_stream(self,message):
+    def get_ones_stream(self,message):
         if type(message)==str:
             message = message.replace("\n", " ")
-            messages = [{'role':'user','content':message}]
-        else:
-            messages=message
+            message = p_generator.generate_spark_prompt(message=message)
+        messages=message
         try:
-            for text in self.spark_api._call(messages):
-                yield text
-        except:
-            return '网络错误'
+            for response in self.spark_api._call(messages):
+                if response['status'] == 0:
+                    text = response['message']
+                    yield {
+                        'status': 0,
+                        'message': text
+                    }
+                elif response['status'] == -1:
+                    print(response['message'])
+                    yield {
+                        'status': -1,
+                        'message': response['message']
+                    }
+                    break
+        except Exception as e:
+            yield {
+                'status': -1,
+                'message':  str(e)
+            }
         
     def cut_memory(self):
+        if len(self.history.messages) == 0:
+            return {
+                'status': -1,
+                'message': '裁剪历史记录失败，历史记录为空'
+            }
         for _ in range(2):
             '''删除一轮对话'''
             first = self.history.messages.pop(0)
             print(f'删除上下文记忆: {first}')
+        return {
+            'status': 0,
+            'message': '裁剪历史记录成功'
+        }
 
-    def talk(self,message):
+    def talk(self,message,stream=False):
         message = message.replace("\n", " ")
-        messages = []
-        self.history.messages.append(message)
-        for i,message in enumerate(self.history.messages):
-            if i % 2 == 0:
-                messages.append({'role':'user','content':message})
-            else:
-                messages.append({'role':'assistant','content':message})
-        try:
+        messages = p_generator.generate_spark_prompt(message=message,history=self.history.messages)
+        if stream:
             total_text = ''
-            for text in self.spark_api._call(messages):
-                total_text += text
-            self.history.messages.append(total_text)
-            return total_text
-        except:
-            self.history.messages = self.history.messages[:-1]
-            return '网络错误'
+            try:
+                for response in self.spark_api._call(messages):
+                    if response['status'] == 0:
+                        text = response['message']
+                        total_text += text
+                        yield {
+                            'status': 0,
+                            'message': text
+                        }
+                    elif response['status'] == -1:
+                        print(response['message'])
+                        yield {
+                            'status': -1,
+                            'message': response['message']
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_text)
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
+        else:
+            try:
+                total_text = ''
+                for response in self.spark_api._call(messages):
+                    if response['status'] == 0:
+                        text = response['message']
+                        total_text += text
+                    elif response['status'] == -1:
+                        print(response['message'])
+                        yield {
+                            'status': -1,
+                            'message': response['message']
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_text)
+                yield {
+                    'status': 0,
+                    'message': total_text
+                }
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
         
     def clear_history(self):
         self.history = ChatMessageHistory()
     
-
 class chatglm_api():
     def __init__(self):
         self.history = ChatMessageHistory()
@@ -229,54 +384,157 @@ class chatglm_api():
 
     def setv(self,api_key=None,temperature=0.95,top_p=0.7,chatglm_type='std'):
         if api_key == '':
-            raise gr.Error('请输入api_key')
+            return {
+                'status': -1,
+                'message': '请输入chatglm api_key'
+            }
         self.api_key = api_key
         self.temperature = temperature
         self.top_p = top_p
         self.chatglm_type = chatglm_type
         zhipuai.api_key = api_key
+        return {
+            'status': 0,
+            'message': '设置成功'
+        }
 
-    def get_ones_openai(self,message):
+    def get_ones(self,message):
         if type(message)==str:
             message = message.replace("\n", " ")
-            messages = {'role':'user','content':message}
-        else:
-            messages=message
+            message = p_generator.generate_chatglm_prompt(message=message)
+        messages=message
         try:
             response = zhipuai.model_api.invoke(
                 model='chatglm_'+self.chatglm_type,
                 prompt=messages,
-                temperature=0.95,
-                top_p=0.7)
-            return response['data']['choices'][0]['content'][1:-1]
-        except:
-            return '网络错误'
+                temperature=self.temperature,
+                top_p=self.top_p)
+            if response['success']:
+                return {
+                    'status': 0,
+                    'message': response['data']['choices'][0]['content'][1:-1]
+                }
+            else:
+                print(response)
+                return {
+                    'status': -1,
+                    'message': 'code:%s, message:%s' % (response['code'],response['msg'])
+                }
+        except Exception as e:
+            return {
+                'status': -1,
+                'message': str(e)
+            }
         
-    def get_ones_openai_stream(self,message):
-        return self.get_ones_openai(message)
+    def get_ones_stream(self,message):
+        if type(message)==str:
+            message = message.replace("\n", " ")
+            message = p_generator.generate_chatglm_prompt(message=message)
+        messages=message
+        try:
+            response = zhipuai.model_api.sse_invoke(
+                model='chatglm_'+self.chatglm_type,
+                prompt=messages,
+                temperature=self.temperature,
+                top_p=self.top_p,
+                incremental=True
+            )
+            for event in response.events():
+                if event.event == "add":
+                    yield {
+                        'status': 0,
+                        'message': event.data
+                    }
+                elif event.event == "error" or event.event == "interrupted":
+                    print(event.data)
+                    yield {
+                        'status': -1,
+                        'message': event.data
+                    }
+                elif event.event == "finish":
+                    yield {
+                        'status': 0,
+                        'message': event.data
+                    }
+                else:
+                    print(event.data)
+                    yield {
+                        'status': -1,
+                        'message': event.data
+                    }
+        except Exception as e:
+            print(response)
+            yield {
+                'status': -1,
+                'message': str(e)
+            }
     
     def cut_memory(self):
+        if len(self.history.messages) == 0:
+            return {
+                'status': -1,
+                'message': '裁剪历史记录失败，历史记录为空'
+            }
         for _ in range(2):
             '''删除一轮对话'''
             first = self.history.messages.pop(0)
             print(f'删除上下文记忆: {first}')
+        return {
+            'status': 0,
+            'message': '裁剪历史记录成功'
+        }
     
-    def talk(self,message):
+    def talk(self,message,stream=False):
         message = message.replace("\n", " ")
-        messages = []
-        self.history.messages.append(message)
-        for i,message in enumerate(self.history.messages):
-            if i % 2 == 0:
-                messages.append({'role':'user','content':message})
-            else:
-                messages.append({'role':'assistant','content':message})
-        try:
-            reply = self.get_ones_openai(messages)
-            self.history.messages.append(reply)
-            return reply
-        except:
-            self.history.messages = self.history.messages[:-1]
-            return '网络错误'
+        messages = p_generator.generate_chatglm_prompt(message=message,history=self.history.messages)
+        if stream:
+            total_reply = ''
+            try:
+                for response in self.get_ones_stream(messages):
+                    if response['status'] == 0:
+                        text = response['message']
+                        total_reply += text
+                        yield {
+                            'status': 0,
+                            'message': text
+                        }
+                    elif response['status'] == -1:
+                        print(response['message'])
+                        yield {
+                            'status': -1,
+                            'message': response['message']
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_reply)
+            except:
+                yield {
+                    'status': -1,
+                    'message': response['message']
+                }
+        else:
+            try:
+                response = self.get_ones(messages)
+                if response['status'] == 0:
+                    reply = response['message']
+                    self.history.messages.append(message)
+                    self.history.messages.append(reply)
+                    yield {
+                        'status': 0,
+                        'message': reply
+                    }
+                elif response['status'] == -1:
+                    print(response['message'])
+                    yield {
+                        'status': -1,
+                        'message': response['message']
+                    }
+            except:
+                yield {
+                    'status': -1,
+                    'message': response['message']
+                }
+
 
     def clear_history(self):
         self.history = ChatMessageHistory()
@@ -290,129 +548,190 @@ class ernie_api():
 
     def setv(self,ernie_api_key=None,ernie_secret_key=None,ernie_temperature=0.95,ernie_top_p=0.8,ernie_penalty_score=1,ernie_type='ernie bot'):
         if ernie_api_key == '':
-            raise gr.Error('请输入ernie_api_key')
+            return {
+                'status': -1,
+                'message': '请输入ernie api key'
+            }
         if ernie_secret_key == '':
-            raise gr.Error('请输入ernie_secret_key')
+            return {
+                'status': -1,
+                'message': '请输入ernie secret key'
+            }
         self.ernie_type = ernie_type
         if ernie_type == 'ernie bot':
             self.url = f'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions'
         elif ernie_type == 'ernie bot turbo':
             self.url = f'https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant'
         else:
-            return None
+            return {
+                'status': -1,
+                'message': '请输入正确的ernie类型'
+            }
 
         self.headers = {
             'Content-Type': 'application/json',
         }
+        self.temperature = ernie_temperature
+        self.top_p = ernie_top_p
+        self.penalty_score = ernie_penalty_score
 
-        self.access_token = get_access_token(ernie_api_key,ernie_secret_key)
+        self.access_token = get_ernie_access_token(ernie_api_key,ernie_secret_key)
+        if self.access_token == None:
+            return {
+                'status': -1,
+                'message': '获取ernie access_token失败'
+            }
 
         self.query = {
             'access_token':self.access_token
         }
 
-        self.temperature = ernie_temperature
-        self.top_p = ernie_top_p
-        self.penalty_score = ernie_penalty_score
+        return {
+            'status': 0,
+            'message': '设置成功'
+        }
 
-    def get_ones_openai(self,message):
+    def get_ones(self,message):
         if type(message)==str:
             message = message.replace("\n", " ")
-
-            if self.ernie_type == 'ernie bot':
-                body = {
-                    'messages':[
-                        {'role':'user','content':message},
-                    ],
-                    'temperature':self.temperature,
-                    'top_p':self.top_p,
-                    'penalty_score':self.penalty_score,
-                    'stream':True
-                }
-            elif self.ernie_type == 'ernie bot turbo':
-                body = {
-                    'messages':[
-                        {'role':'user','content':message},
-                    ],
-                    'stream':False
-                }
-        else:
-            messages=message
+            message = p_generator.generate_ernie_prompt(message=message)
+        if self.ernie_type == 'ernie bot':
             body = {
-                'messages':messages,
+                'messages':message,
+                'temperature':self.temperature,
+                'top_p':self.top_p,
+                'penalty_score':self.penalty_score,
                 'stream':False
             }
-
+        elif self.ernie_type == 'ernie bot turbo':
+            body = {
+                'messages':message,
+                'stream':False
+            }
         try:
             response = requests.request("POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
-            return json.loads(response.text)['result']
-        except:
-            return '网络错误'
+            response = json.loads(response.text)
+            if response.get('result',None) is not None:
+                return {
+                    'status': 0,
+                    'message': response['result']
+                }
+            else:
+                print('code:%s message:%s' % (response['error_code'],response['error_msg']))
+                return {
+                    'status': -1,
+                    'message': 'code:%s message:%s' % (response['error_code'],response['error_msg'])
+                }
+        except Exception as e:
+            return {
+                'status': -1,
+                'message': str(e)
+            }
 
-    def get_ones_openai_stream(self,message):
+    def get_ones_stream(self,message):
         if type(message)==str:
             message = message.replace("\n", " ")
-
-            if self.ernie_type == 'ernie bot':
-                body = {
-                    'messages':[
-                        {'role':'user','content':message},
-                    ],
-                    'temperature':self.temperature,
-                    'top_p':self.top_p,
-                    'penalty_score':self.penalty_score,
-                    'stream':True
-                }
-            elif self.ernie_type == 'ernie bot turbo':
-                body = {
-                    'messages':[
-                        {'role':'user','content':message},
-                    ],
-                    'stream':True
-                }
-        else:
-            messages=message
+            message = p_generator.generate_ernie_prompt(message=message)
+        if self.ernie_type == 'ernie bot':
             body = {
-                'messages':messages,
+                'messages':message,
+                'temperature':self.temperature,
+                'top_p':self.top_p,
+                'penalty_score':self.penalty_score,
+                'stream':True
+            }
+        elif self.ernie_type == 'ernie bot turbo':
+            body = {
+                'messages':message,
                 'stream':True
             }
 
         try:
             response = requests.request("POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
             for section in response.iter_lines(decode_unicode=True):
-                yield json.loads(section)['result']
-        except:
-            return '网络错误'
+                section =  json.loads(section)
+                if section.get('result',None) is not None:
+                    yield {
+                        'status': 0,
+                        'message': section['result']
+                    }
+                else:
+                    print('code:%s message:%s' % (section['error_code'],section['error_msg']))
+                    yield {
+                        'status': -1,
+                        'message': 'code:%s message:%s' % (section['error_code'],section['error_msg'])
+                    }
+        except Exception as e:
+            yield {
+                'status': -1,
+                'message': str(e)
+            }
 
     def cut_memory(self):
+        if len(self.history.messages) == 0:
+            return {
+                'status': -1,
+                'message': '裁剪历史记录失败，历史记录为空'
+            }
         for _ in range(2):
             '''删除一轮对话'''
             first = self.history.messages.pop(0)
             print(f'删除上下文记忆: {first}')
-
-    def talk(self,message):
-        message = message.replace("\n", " ")
-        body = {
-            'messages':[],
-            'temperature':self.temperature,
-            'top_p':self.top_p,
-            'penalty_score':self.penalty_score,
-            'stream':False
+        return {
+            'status': 0,
+            'message': '裁剪历史记录成功'
         }
-        self.history.messages.append(message)
-        for i,message in enumerate(self.history.messages):
-            if i % 2 == 0:
-                body['messages'].append({'role':'user','content':message})
-            else:
-                body['messages'].append({'role':'assistant','content':message})
-        try:
-            response = requests.request("POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
-            reply = json.loads(response.text)['result']
-            self.history.messages.append(reply)
-            return reply
-        except:
-            self.history.messages = self.history.messages[:-1]
-            return '网络错误'
+
+    def talk(self,message,stream=False):
+        message = message.replace("\n", " ")
+        messages = p_generator.generate_ernie_prompt(message=message,history=self.history.messages)
+        if stream:
+            total_reply = ''
+            try:
+                for response in self.get_ones_stream(messages):
+                    if response['status'] == 0:
+                        text = response['message']
+                        total_reply += text
+                        yield {
+                            'status': 0,
+                            'message': text
+                        }
+                    elif response['status'] == -1:
+                        print(response['message'])
+                        yield {
+                            'status': -1,
+                            'message': response['message']
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_reply)
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
+        else:
+            try:
+                response = self.get_ones(messages)
+                if response['status'] == 0:
+                    reply = response['message']
+                    self.history.messages.append(message)
+                    self.history.messages.append(reply)
+                    yield {
+                        'status': 0,
+                        'message': reply
+                    }
+                elif response['status'] == -1:
+                    print(response['message'])
+                    yield {
+                        'status': -1,
+                        'message': response['message']
+                    }
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
 
     def clear_history(self):
         self.history = ChatMessageHistory()
@@ -437,16 +756,32 @@ class openai_api():
             self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key,deployment=engine)
 
 
-    def setv(self,openai_api_key=None,temperature=0.95,max_tokens=4096,top_p=0.7,openai_prompt='',port=10809,model="gpt-3.5-turbo", type='openai', endpoint='',engine=""):
+    def setv(self,openai_api_key='',temperature=0.95,max_tokens=4096,top_p=0.7,openai_prompt='',port=10809,model="gpt-3.5-turbo", type='openai', endpoint='',engine=""):
+        if openai_api_key == '':
+            return {
+                'status': -1,
+                'message': '请输入openai api key'
+            }
         if type=='openai':
             openai.api_type = "open_ai"
-            if port != None:
-                os.environ['http_proxy'] = 'http://127.0.0.1:'+port
-                os.environ["https_proxy"] = "http://127.0.0.1:"+port
+            if port == '':
+                return {
+                    'status': -1,
+                    'message': '请输入openai代理端口'
+                }
+            os.environ['http_proxy'] = 'http://127.0.0.1:'+port
+            os.environ["https_proxy"] = "http://127.0.0.1:"+port
         elif type=='azure':
-            pass
-        if openai_api_key == '':
-            raise gr.Error('请输入openai_api_key')
+            if endpoint == '':
+                return {
+                    'status': -1,
+                    'message': '请输入openai endpoint'
+                }
+            if engine == '':
+                return {
+                    'status': -1,
+                    'message': '请输入openai engine'
+                }
         self.charactor_prompt=SystemMessage(content=openai_prompt)
         self.max_token=max_tokens
         if max_tokens==0:
@@ -491,55 +826,104 @@ class openai_api():
                 max_tokens=self.max_token)
             # 暂未支持
             self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key,deployment=engine)
+        return {
+            'status': 0,
+            'message': '设置成功'
+        }
 
             
-    def get_ones_openai(self,text):
+    def get_ones(self,text):
         if type(text)==str:
             text = text.replace("\n", " ")
-            message=HumanMessage(content=text)
-            messages=[]
-            if self.charactor_prompt.content!='':
-                messages = [self.charactor_prompt]
-            messages.append(message)
-        else:
-            messages=text
-        # if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
-        #     return '字数超限'
-        return self.llm_nonstream(messages).content
-    
-    def get_ones_openai_stream(self,text):
-        if type(text)==str:
-            text = text.replace("\n", " ")
-            message=HumanMessage(content=text)
-            messages=[]
-            if self.charactor_prompt.content!='':
-                messages = [self.charactor_prompt]
-            messages.append(message)
-        else:
-            messages=text
+            text = p_generator.generate_openai_prompt(message=text,system_message=self.charactor_prompt.content)
+        messages=text
         if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
             return '字数超限'
-        yield self.llm(messages).content
+        try:
+            response = self.llm_nonstream(messages)
+            print(response.content)
+            return {
+                'status': 0,
+                'message': response.content
+            }
+        except Exception as e:
+            return {
+                'status': -1,
+                'message': str(e)
+            }
+        
+    def get_ones_stream(self,text):
+        if type(text)==str:
+            text = text.replace("\n", " ")
+            text = p_generator.generate_openai_prompt(message=text,system_message=self.charactor_prompt.content)
+        messages=text
+        if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
+            return '字数超限'
+        try:
+            for response in self.llm(messages):
+                print(response[1])
+                yield {
+                    'status': 0,
+                    'message': response[1]
+                }
+        except Exception as e:
+            yield {
+                'status': -1,
+                'message': str(e)
+            }
     
     def cut_memory(self):
+        if len(self.history.messages) == 0:
+            return {
+                'status': -1,
+                'message': '裁剪历史记录失败，历史记录为空'
+            }
         for _ in range(2):
             '''删除一轮对话'''
             first = self.history.messages.pop(0)
             print(f'删除上下文记忆: {first}')
+        return {
+            'status': 0,
+            'message': '裁剪历史记录成功'
+        }
 
-    def talk(self,text):
-        text = text.replace("\n", " ")
-        message=HumanMessage(content=text)
-        messages=[]
-        if self.charactor_prompt.content!='':
-            messages = [self.charactor_prompt]
-        self.history.messages.append(message)
-        messages.extend(self.history.messages)
+    def talk(self,message,stream=False):
+        message = message.replace("\n", " ")
+        messages = p_generator.generate_openai_prompt(message=message,system_message=self.charactor_prompt.content,history=self.history.messages)
         if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
             self.cut_memory()
-        reply=self.llm(messages).content
-        self.history.messages.append(AIMessage(content=reply))
-        return reply
+        if stream:
+            total_reply = ''
+            try:
+                for response in self.llm(messages):
+                    if len(response) == 0:
+                        break
+                    total_reply += response[1]
+                    yield {
+                        'status': 0,
+                        'message': response[1]
+                    }
+                self.history.messages.append(HumanMessage(content=message))
+                self.history.messages.append(AIMessage(content=total_reply))
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
+        else:
+            try:
+                response = self.llm_nonstream(messages).content
+                self.history.messages.append(HumanMessage(content=message))
+                self.history.messages.append(AIMessage(content=response))
+                yield {
+                    'status': 0,
+                    'message': response
+                }
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
     
     def clear_history(self):
         self.history = ChatMessageHistory()

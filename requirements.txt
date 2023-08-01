@@ -61,3 +61,4 @@ scikit-maad
 praat-parselmouth
 dashscope
 bitsandbytes
+commentjson

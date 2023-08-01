@@ -151,7 +151,7 @@ class Svc(object):
 
         real_path = os.path.split(os.path.realpath(__file__))[0]
         model_path = os.path.join(real_path, "..", "..", "..", "..", "models", "svc_models", "hubert_model", "hubert-soft-0d54a1f4.pt")
-        if os.path.exists(model_path):
+        if not os.path.exists(model_path):
             raise gr.Error("models/svc_models/hubert_model/下缺少hubert-soft-0d54a1f4.pt声音解码器文件")
 
         self.hubert_path = model_path

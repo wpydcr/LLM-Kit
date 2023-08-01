@@ -30,6 +30,7 @@ class local_doc_qa():
         根据上述已知信息，简洁和专业的来回答用户的问题。不允许在答案中添加编造成分，答案请使用中文。 问题是：{question}"""
         self.mysql = MySQLDB()
         self.mysql_model = None
+        
     def clear(self):
         self.vector_store = None
         return gr.update(value=None),gr.update(value=None),gr.update(value=None)

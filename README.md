@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # 安装依赖
 $ pip install -r requirements.txt
 ```
- 依赖也可以直接下载：[Windows环境包](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux环境包](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
+ 依赖也可以直接下载：[Windows环境包](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux环境包]()。
  
  [显卡驱动](https://www.nvidia.cn/Download/index.aspx?lang=cn)和[cuda](https://developer.nvidia.com/cuda-toolkit-archive)自行安装
 

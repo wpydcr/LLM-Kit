@@ -1,5 +1,3 @@
-import re
-
 eg_purchase = """
 USER INPUT: On 2023-01-22, the shop purchased 100kg banana from supplier 'ABC' (contact number: 67543, email: abc_sup@gmail.com) at 1.2 dollar/kg and planed sell at 1.8 dollar/kg. Banana's fruit type is berry and shelf life is 15 days.
 ANSWER:

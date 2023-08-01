@@ -257,7 +257,6 @@ class BertMatchModel(BaseModel):
         self.save_best_or_last_model(eval_dataset,results,final_model,best_eval_metric,current_loss,save_last=True)
         yield global_step, training_progress_scores
 
-        # return global_step, training_progress_scores
     def save_best_or_last_model(self, eval_dataset,results,final_model,best_eval_metric,current_loss,save_last=False):
         if eval_dataset and results:
             eval_spearman = results["eval_spearman"]

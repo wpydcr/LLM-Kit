@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # install requirements
 $ pip install -r requirements.txt
 ```
- Or simply download：[Windows Env](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux Env](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
+ Or simply download：[Windows Env](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux Env]()。
  
  [GPU Driver](https://www.nvidia.cn/Download/index.aspx?lang=cn) and [cuda](https://developer.nvidia.com/cuda-toolkit-archive) is also required and should be pre-installed.
 
@@ -109,7 +109,7 @@ $ pip install -r requirements.txt
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
   - [x] Full Parameter finetune
 - [x] Embedding support trainning(train,inference:models that can be loaded by the HuggingFaceEmbeddings)
-  - [x] [Models constructed by BERT,SENTENCEBERT and COSENT](https://github.com/shibing624/text2vec#evaluation)
+  - [x] [BERT,SENTENCEBERT,COSENT架构的模型](https://github.com/shibing624/text2vec#evaluation)
     - [x] [shibing624/text2vec-base-chinese](https://huggingface.co/shibing624/text2vec-base-chinese)
     - [x] [bert-base-uncased](https://huggingface.co/bert-base-uncased)
     - [x] [paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
