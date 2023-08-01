@@ -1,6 +1,7 @@
 import json
 import datetime
 import os
+import gradio as gr
 
 real_path = os.path.split(os.path.realpath(__file__))[0]
 new_path = os.path.join(real_path, "..", "data",'modeldata')
@@ -14,6 +15,7 @@ def download_org_data(a,download_path):
             lsa.append({"que":i, "ans": a[i]})
         with open(os.path.join(new_path, 'json',download_path+'.json'), "w", encoding="utf-8") as file:
             json.dump(lsa, file, ensure_ascii=False, indent=4)
+    
 
 
 def download_jsonl_data(a,download_path,type_=None):

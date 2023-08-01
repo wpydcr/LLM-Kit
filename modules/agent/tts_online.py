@@ -2,7 +2,6 @@ import requests
 import time
 import zhtts
 import os
-import sys
 
 real_path = os.path.split(os.path.realpath(__file__))[0]
 
@@ -47,7 +46,5 @@ def get_voice(text, spd, filename, gen_type, lang):
         # 暂时支持中文
         tts_model = zhtts.TTS()
         tts_model.text2wav(text, filename+'.wav')
-
-
 
     return filename

@@ -1,6 +1,7 @@
 
 import gradio as gr
 from modules.model.emb_auto import AutoEmb
+from modules.model.use_api import *
 import os
 import plotly.graph_objs as go
 import random
@@ -122,19 +123,28 @@ class embedding_visualization_plot():
             return f"{suffix}载入成功, 输入语句数" + str(output)
         return f"{suffix}文件载入失败, 请检查文件格式"
 
-    def plot(self, model_names):
+    def plot(self, api_list,model_list,params):
         '''
             绘制图片, 返回fig
         '''
-        if len(model_names) == 0:
-            raise "未选择模型"
+        if self.content == []:
+            raise gr.Error("请先上传文件")
         embded_list = []
-        for model_name in model_names:
+        for api_name in api_list:
+            if api_name == 'openai':
+                api = openai_api()
+                emb = api.get_embedding(openai_api_key=params['openai']['api_key'],port=params['openai']['port'])
+            elif api_name == 'azure openai':
+                api = openai_api()
+                emb = api.get_embedding(openai_api_key=params['azure openai']['api_key'],type='azure',endpoint=params['azure openai']['endpoint'],engine=params['azure openai']['engine'])
+            embeddings = emb.embed_documents(self.content)
+            embded_list.append(embeddings)
+        for model_name in model_list:
             model = AutoEmb(model_name)
             embeddings = model.embedding.embed_documents(self.content)
             embded_list.append(embeddings)
         fig = go.Figure()
-        tsne_plot = self.TSNE_Plot(self.content, embded_list, self.label, model_num=len(model_names), model_name=model_names,
+        tsne_plot = self.TSNE_Plot(self.content, embded_list, self.label, model_num=len(api_list+model_list), model_name=api_list+model_list,
                                    n_components_min=50)
         fig = tsne_plot.tsne_plot()
         return fig

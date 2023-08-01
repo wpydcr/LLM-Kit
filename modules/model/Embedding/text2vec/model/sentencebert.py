@@ -195,21 +195,23 @@ class SentenceBertModel(BaseSentenceModel):
                 report = pd.DataFrame(training_progress_scores)
                 report.to_csv(os.path.join(output_dir, "training_progress_scores.csv"), index=False)
 
-                if eval_dataset and results:
-                    eval_spearman = results["eval_spearman"]
-                    if eval_spearman > best_eval_metric:
-                        best_eval_metric = eval_spearman
-                        logger.info(f"Save new best model, best_eval_metric: {best_eval_metric}")
-                        self.save_model(f'models/Embedding/{final_model}', model=self.model, results=results)
-                elif len(training_progress_scores["train_loss"]) <= 1 or current_loss < min(training_progress_scores["train_loss"][:-1]):
-                    logger.info(f"Save new best model, current_loss: {current_loss}")
-                    self.save_model(f'models/Embedding/{final_model}', model=self.model, results=None)
-                else:
-                    pass
+                best_eval_metric = self.save_best_or_last_model(eval_dataset,results,final_model,best_eval_metric,current_loss)
                 yield global_step, training_progress_scores
                 
             if 0 < max_steps < global_step:
                 break
+        self.save_best_or_last_model(eval_dataset,results,final_model,best_eval_metric,current_loss,save_last=True)
         yield global_step, training_progress_scores
 
-        # return global_step, training_progress_scores
+    def save_best_or_last_model(self, eval_dataset,results,final_model,best_eval_metric,current_loss,save_last=False):
+        if eval_dataset and results:
+            eval_spearman = results["eval_spearman"]
+            if eval_spearman > best_eval_metric:
+                best_eval_metric = eval_spearman
+                logger.info(f"Save new best model, best_eval_metric: {best_eval_metric}")
+                self.save_model(f'models/Embedding/{final_model}', model=self.model, results=results)
+        elif save_last:
+            logger.info(f"Save new model, current_loss: {current_loss}")
+            self.save_model(f'models/Embedding/{final_model}', model=self.model, results=None)
+
+        return best_eval_metric

@@ -4,7 +4,6 @@
 # 绑定到webui 组件的事件上，例如按钮点击，选项变更。
 
 
-
 import sys
 import gradio as gr
 from utils.dl_data import *
@@ -83,6 +82,7 @@ class StoppableThread(threading.Thread):
     """Thread class customized to enable stop and restart for data processing function
         in webui data module.
     """
+
     def __init__(self):
         super().__init__()
         self._stop_event = threading.Event()
@@ -109,7 +109,11 @@ class StoppableThread(threading.Thread):
         self.flag = True
         if self.type is None:
             while not self.stopped() and len(self.answer_list) > 0:
-                ans = self.openai.get_ones_openai(self.answer_list[0])
+                ans = self.openai.get_ones(self.answer_list[0])
+                if ans['status'] == 0:
+                    ans = ans['message']
+                else:
+                    raise gr.Error(ans['message'])
                 self.queue.put([self.answer_list[0], ans, self.answer_list])
                 self.answer_list = self.answer_list[1:]
                 time.sleep(self.timesleep)
@@ -117,7 +121,11 @@ class StoppableThread(threading.Thread):
         elif self.type == 'embed':
             while not self.stopped() and len(self.answer_list) > 0:
                 inputs = self.answer_list[0][0]+'。'+self.answer_list[0][1]
-                ans = self.openai.get_ones_openai(inputs)
+                ans = self.openai.get_ones(inputs)
+                if ans['status'] == 0:
+                    ans = ans['message']
+                else:
+                    raise gr.Error(ans['message'])
                 self.queue.put([inputs.split('。'), ans, self.answer_list])
                 self.answer_list = self.answer_list[1:]
                 time.sleep(self.timesleep)
@@ -139,6 +147,7 @@ class data_process():
         mysql (MySQLDB): The MySQLDB object.
 
     """
+
     def __init__(self):
         self.json_dict = OrderedDict()
         self.embedding_json_dict = OrderedDict()
@@ -163,13 +172,12 @@ class data_process():
         elif b != '':
             d = b
         return self.json_dict, c, d
-    
-    def skip_qa(self,a):
-        if len(self.answer_list)>1:
-            self.answer_list = self.answer_list[1:]
-            return self.answer_list[0],a
-        return '',''
 
+    def skip_qa(self, a):
+        if len(self.answer_list) > 1:
+            self.answer_list = self.answer_list[1:]
+            return self.answer_list[0], a
+        return '', ''
 
     def save_embed_data(self, sentence1, sentence2, label):
         c = ''
@@ -288,22 +296,35 @@ class data_process():
                         "label": 0 if int(line.split()[2]) < 2.5 else 1
                     }
                 else:
-                    raise gr.Error("Unsupported format of file.请检查上传的文本格式是否符合要求。")
+                    raise gr.Error(
+                        "Unsupported format of file.请检查上传的文本格式是否符合要求。")
         outs = list(self.embedding_json_dict.items())
         return [["数据集大小", str(len(outs))+'条']]+outs[-6:]
 
     def ones_openai(self, question, openai_api, temperature, max_tokens, top_p, openai_prompt, port):
         if len(openai_api) < 40 or question == '':
             return None
-        self.openai.setv(openai_api, temperature, max_tokens,
+        response = self.openai.setv(openai_api, temperature, max_tokens,
                          top_p, openai_prompt, port)
-        ans = self.openai.get_ones_openai(question)
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
+        ans = self.openai.get_ones(question)
+        if ans['status'] == 0:
+            ans = ans['message']
+        else:
+            raise gr.Error(ans['message'])
         return ans
 
     def ones_openai_doc(self, question, openai_api, temperature, max_tokens, top_p, openai_prompt, port):
-        self.openai.setv(openai_api, temperature, max_tokens,
+        response = self.openai.setv(openai_api, temperature, max_tokens,
                          top_p, openai_prompt, port)
-        ans = self.openai.get_ones_openai(question)
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
+        ans = self.openai.get_ones(question)
+        if ans['status'] == 0:
+            ans = ans['message']
+        else:
+            raise gr.Error(ans['message'])
         self.org_json_dict[question] = ans
         for i in ans.split('。'):
             j = i.split('答：')
@@ -314,8 +335,10 @@ class data_process():
         return self.json_dict, self.org_json_dict
 
     def start_openai_doc(self, openai_api, temperature, max_tokens, top_p, openai_prompt, port, timesleep):
-        self.openai.setv(openai_api, temperature, max_tokens,
+        response = self.openai.setv(openai_api, temperature, max_tokens,
                          top_p, openai_prompt, port)
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
         self.thread.setv(self.openai, timesleep, self.answer_list)
         # 启动线程
         self.thread.start()
@@ -336,8 +359,10 @@ class data_process():
         return self.json_dict
 
     def start_openai(self, openai_api, temperature, max_tokens, top_p, openai_prompt, port, timesleep):
-        self.openai.setv(openai_api, temperature, max_tokens,
+        response = self.openai.setv(openai_api, temperature, max_tokens,
                          top_p, openai_prompt, port)
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
         self.thread.setv(self.openai, timesleep, self.answer_list)
         # 启动线程
         self.thread.start()
@@ -352,8 +377,10 @@ class data_process():
         return self.json_dict
 
     def start_openai_embed(self, openai_api, temperature, max_tokens, top_p, openai_prompt, port, timesleep):
-        self.openai.setv(openai_api, temperature, max_tokens,
+        response = self.openai.setv(openai_api, temperature, max_tokens,
                          top_p, openai_prompt, port)
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
         self.thread.setv(self.openai, timesleep,
                          self.sentence_pair, type_='embed')
         # 启动线程
@@ -403,30 +430,38 @@ class data_process():
         return [json_test, json_train]
 
     def dl_jsonl1(self, dpath, split_data):
+        if self.json_dict == {}:
+            return gr.update(value="No data")
         if split_data:
             download_jsonl_data(self.split_json(self.json_dict), dpath)
         else:
             download_jsonl_data([self.json_dict], dpath)
+        return gr.update(value="Saved to data/modeldata/LLM")
 
     def dl_embed(self, embed_download_path, train_valid=False):
+        if self.embedding_json_dict == {}:
+            return gr.update(value="No data")
         if train_valid:
             download_jsonl_data(self.split_json(
                 self.embedding_json_dict), embed_download_path, 'embed')
         else:
             download_jsonl_data([self.embedding_json_dict],
                                 embed_download_path, 'embed')
-        return gr.update(value = "Saved to data/modeldata/Embedding")
-
+        return gr.update(value="Saved to data/modeldata/Embedding")
 
     def dl_jsonl2(self, dpath, split_data):
+        if self.upload_dict == {}:
+            return gr.update(value="No data")
         if split_data:
             download_jsonl_data(self.split_json(self.upload_dict), dpath)
         else:
             download_jsonl_data([self.upload_dict], dpath)
+        return gr.update(value="Saved to data/modeldata/LLM")
 
     def connect_mysql(self, host, user, password, port):
         try:
-            self.mysql.connect(host=host, user=user,password=password, port=port)
+            self.mysql.connect(host=host, user=user,
+                               password=password, port=port)
             databases = self.mysql.get_databases()
             return gr.update(choices=databases+['新建数据库'])
         except:
@@ -437,14 +472,15 @@ class data_process():
             return gr.update(visible=True)
         return gr.update(visible=False)
 
-    def mysql_upload(self, host,user,password,port,database, new_database, files):
+    def mysql_upload(self, host, user, password, port, database, new_database, files):
         # 支持excel、csv、txt
         error = []
         success = []
         if database != '新建数据库':
             new_database = database
         else:
-            self.mysql.connect(host=host, user=user,password=password, port=port)
+            self.mysql.connect(host=host, user=user,
+                               password=password, port=port)
             if not self.mysql.create_database(new_database):
                 raise gr.Error('数据库创建失败')
         for file in files:
@@ -483,13 +519,11 @@ class video_apply():
 
     """
 
-
     def __init__(self):
         self.chat = play_base_api()
         self.history = []
         self.svc = None
         self.vits = None
-
 
     def set_v(self, params):
         """Sets the parameters for play_base_api.
@@ -541,9 +575,9 @@ class video_apply():
 
         """
         self.chat.set_llm(params)
-        return '',gr.update(visible=True)
+        return '', gr.update(visible=True)
 
-    def predict(self, input, chatbot, gen_type, lang,voice_style,show_type):
+    def predict(self, input, chatbot, gen_type, lang, voice_style, show_type):
         """Generates inference using the large language Model by given input as prompt.
 
                 Args:
@@ -559,18 +593,19 @@ class video_apply():
         Raises:
             gr.Error: If the LL Model or character prompt is not set.
 
-        """ 
+        """
         if self.chat.llm.play is None:
             raise gr.Error('请选择设定')
-        response,emo = self.chat.llm.talk(input)
+        response, emo = self.chat.llm.talk(input)
         chatbot.append((input, response+('' if emo is None else emo)))
         if show_type == '文本':
-            yield '', chatbot, 's', None
+            return '', chatbot, 's', None
         else:
-            loud, audio = self.generate_video(response, gen_type, lang,voice_style)
-            yield '', chatbot, loud, audio
+            loud, audio = self.generate_video(
+                response, gen_type, lang, voice_style)
+            return '', chatbot, loud, audio
 
-    def generate_video(self,response, gen_type,lang,voice_style):
+    def generate_video(self, response, gen_type, lang, voice_style):
         """Used to use to generate video that match the response audio, abandoned and replaced by live2d character.
             Now only generates the voice base on the inference content from the model, and process the audio to
             the chosen speaker voice style if svc voice style is selected.
@@ -592,22 +627,23 @@ class video_apply():
             real_path, "..", "data", "apply", "audio", "tts")
 
         if gen_type == "本地" or gen_type == "在线":
-            out_f = get_voice(response, 5, filename=filename, gen_type=gen_type, lang=lang)
+            out_f = get_voice(response, 5, filename=filename,
+                              gen_type=gen_type, lang=lang)
         else:
             if self.vits == None:
                 self.vits = VITS()
-            self.vits.load(gen_type,0)
-            out_f = self.vits.to_audio(response,filename)
-
+            self.vits.load(gen_type, 0)
+            out_f = self.vits.to_audio(response, filename)
 
         if self.svc == None:
             self.svc = SVC()
         self.svc.load(voice_style)
-        self.svc.voice_process(voice_style,filename) # doesnt process if the voice_style is default.
+        # doesnt process if the voice_style is default.
+        self.svc.voice_process(voice_style, filename)
 
         if out_f != None:
             x, sr = librosa.load(os.path.join(
-                real_path, "..", "data", "apply", "audio", "tts.wav" if gen_type=='本地' else 'tts.mp3'), sr=8000)
+                real_path, "..", "data", "apply", "audio", "tts.mp3" if gen_type == '在线' else 'tts.wav'), sr=8000)
 
             x = x - min(x)
             x = x / max(x)
@@ -628,7 +664,7 @@ class video_apply():
                 pass
             loud.append(0)
 
-            return str(loud), os.path.join(real_path, "..", "data", "apply", "audio", "tts.wav" if gen_type=='本地' else 'tts.mp3')
+            return str(loud), os.path.join(real_path, "..", "data", "apply", "audio", "tts.mp3" if gen_type == '在线' else 'tts.wav')
         else:
             return None, None
 
@@ -638,7 +674,7 @@ class video_apply():
 
     def clear(self):
         if self.chat.llm.model_use is None:
-            return [],'',gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(visible=False)
+            return [], '', gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(visible=False)
         if self.chat.llm.model_use == 'openai' or self.chat.llm.model_use == 'azure openai':
             self.chat.llm.model_use = None
             self.chat.llm.clear_history()
@@ -646,10 +682,10 @@ class video_apply():
             self.chat.llm.model_use = None
             self.chat.llm.llm.clear()
             self.chat.llm.clear_history()
-        return [],'',gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(visible=False)
-    
+        return [], '', gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(visible=False)
+
     def clear_config(self):
-        return gr.update(value=None),gr.update(value=False),gr.update(value=0),gr.update(value=''),gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(value=False),gr.update(value='')
+        return gr.update(value=None), gr.update(value=False), gr.update(value=0), gr.update(value=''), gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(value=False), gr.update(value='')
 
 
 class play_base_api():
@@ -729,26 +765,34 @@ class chat_base_api():
 
                """
         if self.api_type == 'openai':
-            self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get('prompt',''),port=params['port'])
+            response = self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get(
+                'prompt', ''), port=params['port'])
         elif self.api_type == 'azure openai':
-            self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get('prompt',''),type='azure',endpoint=params['endpoint'],engine=params['engine'])
+            response = self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get(
+                'prompt', ''), type='azure', endpoint=params['endpoint'], engine=params['engine'])
         elif self.api_type == 'ernie bot':
-            self.llm.setv(ernie_api_key=params['api_key'], ernie_secret_key=params['secret_key'], ernie_temperature=params['temperature'], ernie_top_p=params['top_p'],ernie_penalty_score=params['penalty_score'])
+            response = self.llm.setv(ernie_api_key=params['api_key'], ernie_secret_key=params['secret_key'],
+                          ernie_temperature=params['temperature'], ernie_top_p=params['top_p'], ernie_penalty_score=params['penalty_score'])
         elif self.api_type == 'ernie bot turbo':
-            self.llm.setv(ernie_api_key=params['api_key'], ernie_secret_key=params['secret_key'], ernie_type='ernie bot turbo')
+            response = self.llm.setv(
+                ernie_api_key=params['api_key'], ernie_secret_key=params['secret_key'], ernie_type='ernie bot turbo')
         elif self.api_type == 'chatglm api':
-            self.llm.setv(api_key=params['api_key'], temperature=params['temperature'], top_p=params['top_p'],chatglm_type=params['type'])
+            response = self.llm.setv(api_key=params['api_key'], temperature=params['temperature'],
+                          top_p=params['top_p'], chatglm_type=params['type'])
         elif self.api_type == 'spark api':
-            self.llm.setv(spark_api_key=params['api_key'],spark_api_secret=params['secret_key'],spark_appid=params['appid'],temperature=params['temperature'],top_k=params['top_k'],max_tokens=params['max_tokens'])
+            response = self.llm.setv(spark_api_key=params['api_key'], spark_api_secret=params['secret_key'], spark_appid=params['appid'],
+                          temperature=params['temperature'], top_k=params['top_k'], max_tokens=params['max_tokens'])
         elif self.api_type == 'ali api':
-            self.llm.setv(api_key=params['api_key'], top_p=params['top_p'],top_k=params['top_k'],kuake_search=params['kuake_search'])
+            response = self.llm.setv(api_key=params['api_key'], top_p=params['top_p'],
+                          top_k=params['top_k'], kuake_search=params['kuake_search'])
         else:
             pass
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
 
-    def predict(self, input, chatbot):
-        response = self.llm.talk(input)
-        chatbot.append([parse_text(input), parse_text(response)])
-        return chatbot, ''
+    def predict(self, input,stream=False):
+        for response in self.llm.talk(input,stream):
+            yield response
 
     def reset_state(self):
         self.llm.clear_history()
@@ -768,7 +812,7 @@ class chat_base_model():
 
     def clear(self):
         if self.model_name is None:
-            return [], [], '',gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(visible=False)
+            return [], [], '', gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(visible=False)
         elif self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api':
             self.model_name = ''
             self.llm.reset_state()
@@ -777,7 +821,17 @@ class chat_base_model():
             self.model_name = ''
             if self.llm.model_name != '':
                 self.llm.clear()
-        return [], [], '',gr.update(value=None),gr.update(value=None),gr.update(value=None),gr.update(visible=False)
+        return [], [], '', gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(visible=False)
+
+    def clears(self):
+        if self.model_name is None:
+            return [], [], [], [],'', gr.update(value=None), gr.update(value=None),gr.update(visible=False)
+
+        else:
+            self.model_name = ''
+            if self.llm.model_name != '':
+                self.llm.clear()
+        return [], [], [], [],'', gr.update(value=None), gr.update(value=None),gr.update(visible=False)
 
     def reset_state(self):
         if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api':
@@ -785,48 +839,59 @@ class chat_base_model():
             return [], [], ''
         else:
             return [], [], ''
+    def reset_states(self):
 
-    def load_api_params(self,params):
+        return gr.update(value=[]),gr.update(value=[]),gr.update(value=[]),gr.update(value=[]),gr.update(value="")
+
+    def load_api_params(self, params):
         self.model_name = params.get('name')
         self.llm = chat_base_api(self.model_name)
         self.llm.set_v(params)
-        return '',gr.update(visible=True)
+        return '', gr.update(visible=True)
 
     def load_model(self, params):
         self.model_name = params.get('name')
         self.llm = AutoLM()
         self.llm.use_deepspeed = params.get('use_deepspeed')
         self.llm.load_model(max_length=params.get('max_length'), top_p=params.get('top_p'), temperature=params.get('temperature'),
-                            model_name=self.model_name, use_lora=(params.get('lora') != None), lora_name=params.get('lora'),use_4bit=True if params.get('quantization') == '4 bit' else False,use_8bit=True if params.get('quantization') == '8 bit' else False)
+                            model_name=self.model_name, use_lora=(params.get('lora') != None), lora_name=params.get('lora'), use_4bit=True if params.get('quantization') == '4 bit' else False, use_8bit=True if params.get('quantization') == '8 bit' else False)
 
-        return '',gr.update(visible=True)
-    
-    def query_from_mysql(self,input,chatbot,database,host,user,password,port,selected_database=None,selected_table=None):
+        return '', gr.update(visible=True)
+
+    def query_from_mysql(self, input, chatbot, database, host, user, password, port, selected_database=None, selected_table=None):
         if host == '' or user == '' or password == '' or port == '':
             raise gr.Error("请连接数据库")
         if selected_database is None:
             raise gr.Error("请选择数据库")
-        self.mysql.connect(host=host, user=user, password=password, port=port, database=database)
+        self.mysql.connect(host=host, user=user,
+                           password=password, port=port, database=database)
+        if input == '':
+            raise gr.Error('请输入内容')
         table_details = self.mysql.get_table_details()
         if table_details is None:
             raise gr.Error(f"未获取到数据库{database}的表信息")
-        if hasattr(self.llm,'llm'):
-            response,sql_results,output_sql = generate_chat_responses(input,self.mysql,[],table_details,self.llm.llm,self.model_name)
+        if hasattr(self.llm, 'llm'):
+            response, sql_results, output_sql = generate_chat_responses(
+                input, self.mysql, [], table_details, self.llm.llm, self.model_name)
         else:
-            response,sql_results,output_sql = generate_chat_responses(user_inp=input,mysql_db=self.mysql,historical_message=[],llm=self.llm,table_details=table_details,llm_name=self.model_name)
+            response, sql_results, output_sql = generate_chat_responses(user_inp=input, mysql_db=self.mysql, historical_message=[
+            ], llm=self.llm, table_details=table_details, llm_name=self.model_name)
+        if response['status'] == -1:
+            raise gr.Error(response['message'])
+        response = response['message']
         source = "\n\n"
         source += f"""<details> <summary> SQL语句</summary>\n{output_sql}\n</details>"""
         chatbot.append([input, response])
-        chatbot=list(chatbot)
+        chatbot = list(chatbot)
         chatbot[-1][-1] += source
         databses = self.mysql.get_databases()
         if selected_database not in databses:
             self.mysql.database = None
-            return chatbot,'',gr.update(choices=databses,value=None),gr.update(choices=[],value=None),gr.update(visible=False)
+            return chatbot, '', gr.update(choices=databses, value=None), gr.update(choices=[], value=None), gr.update(visible=False)
         else:
             tables = self.mysql.get_tables(selected_database)
             if selected_table not in tables:
-                return chatbot,'',gr.update(choices=databses,value=selected_database),gr.update(choices=tables,value=None),gr.update(visible=False)
+                return chatbot, '', gr.update(choices=databses, value=selected_database), gr.update(choices=tables, value=None), gr.update(visible=False)
             else:
                 sql_results = self.mysql.get_table_data(selected_table)
                 df = pd.DataFrame(sql_results)
@@ -835,11 +900,9 @@ class chat_base_model():
                     fields = self.mysql.get_fields(selected_table)
                     # 将fields转成DataFrame，数据为None
                     df = pd.DataFrame(columns=fields)
-                return chatbot,'',gr.update(choices=databses,value=selected_database),gr.update(choices=tables,value=selected_table),gr.update(value=df,visible=True)
+                return chatbot, '', gr.update(choices=databses, value=selected_database), gr.update(choices=tables, value=selected_table), gr.update(value=df, visible=True)
 
-
-
-    def predict(self, input, chatbot, history, net, search, search_key, result_len,prompt=''):
+    def predict(self, input, chatbot, history=[], stream=False, net=False, search='bing', search_key='', result_len='3', prompt='',doc=None,doc_type='faiss'):
         """
             Generates a response from the chatbot model given an input, mysql database and vector store if applicable.
 
@@ -878,52 +941,34 @@ class chat_base_model():
                 fact_prompt = f'This following message is relative context searched from internet:\nInformation:{answer}'
                 prompt = prompt+'\n'+fact_prompt
 
-
-        from ui.apply_knowledge import doc_qa
-        if doc_qa.vector_store != None:
-            lo_doc, resp = doc_qa.get_similarity(input)
-            prompt = prompt + '\n' + lo_doc
-
+        if doc is not None:
+            if doc_type == 'faiss':
+                from ui.apply_knowledge import doc_qa
+                if doc_qa.vector_store != None:
+                    lo_doc, resp = doc_qa.get_similarity(input)
+                    prompt = prompt + '\n' + lo_doc
+            else:
+                doc_qa = doc
+                lo_doc, resp = doc_qa.get_similarity(input)
+                prompt = prompt + '\n' + lo_doc
         if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api':
             if self.model_name == 'openai' or self.model_name == 'azure openai':
                 self.llm.llm.charactor_prompt.content = prompt
-            input = prompt+'\n'+input
-            chatbot, _ = self.llm.predict(input, chatbot)
-            chatbot[-1][0] = input
-            if doc_qa.vector_store !=None:
-                source = "\n\n"
-                source += "".join(
-                    [f"""<details> <summary> 知识库出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}  </summary>\n"""
-                    f"""{doc.page_content}\n"""
-                    f"""</details>"""
-                    for i, doc in enumerate(resp)])
-                chatbot=list(chatbot)
-                chatbot[-1][-1] += source
-            if net and not answer == '':
-                source = "\n\n"
-                source += "".join(
-                    [f"""<details> <summary> 网络出处 [{i + 1}] <a href="{doc["link"]}" target="_blank">{doc["title"]}</a>  </summary>\n"""
-                    f"""{doc['snippet']}\n"""
-                    f"""</details>"""
-                    for i, doc in enumerate(rep)])
-                chatbot = list(chatbot)
-                chatbot[-1][-1] += source
-            yield chatbot, [], ''
-        else:
-            yr = prompt+'\n'
-            chatbot.append((parse_text(input), ""))
-            newi = yr+input
-            for response, history in self.llm._call(prompt=newi, history=history, streaming=True):
-                chatbot[-1] = [parse_text(input), parse_text(response)]
-                if doc_qa.vector_store !=None and type=='faiss':
-                    source = "\n\n"
-                    source += "".join(
-                        [f"""<details> <summary> 知识库出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}  </summary>\n"""
-                        f"""{doc.page_content}\n"""
-                        f"""</details>"""
-                        for i, doc in enumerate(resp)])
-                    chatbot=list(chatbot)
-                    chatbot[-1][-1] += source
+            inputs = prompt+'\n'+input
+            chatbot.append([input, ''])
+            for response in self.llm.predict(inputs,stream):
+                chatbot[-1][-1] += response['message']
+                yield chatbot, [], ''
+            if response['status'] == 0:
+                if doc is not None:
+                    if doc_qa.vector_store != None:
+                        source = "\n\n"
+                        source += "".join(
+                            [f"""<details> <summary> 知识库出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}  </summary>\n"""
+                            f"""{doc.page_content}\n"""
+                            f"""</details>"""
+                            for i, doc in enumerate(resp)])
+                        chatbot[-1][-1] += source
                 if net and not answer == '':
                     source = "\n\n"
                     source += "".join(
@@ -931,17 +976,156 @@ class chat_base_model():
                         f"""{doc['snippet']}\n"""
                         f"""</details>"""
                         for i, doc in enumerate(rep)])
+                    chatbot[-1][-1] += source
+                yield chatbot, [], ''
+        else:
+            yr = prompt+'\n'
+            chatbot.append((parse_text(input), ""))
+            newi = yr+input
+            for response, history in self.llm._call(prompt=newi, history=history, streaming=True):
+                chatbot[-1] = [parse_text(input), parse_text(response)]
+                yield chatbot, history, ''
+            if doc is not None:
+                if doc_qa.vector_store != None:
+                    source = "\n\n"
+                    source += "".join(
+                        [f"""<details> <summary> 知识库出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}  </summary>\n"""
+                        f"""{doc.page_content}\n"""
+                        f"""</details>"""
+                        for i, doc in enumerate(resp)])
                     chatbot = list(chatbot)
                     chatbot[-1][-1] += source
-                yield chatbot, history, ''
+            if net and not answer == '':
+                source = "\n\n"
+                source += "".join(
+                    [f"""<details> <summary> 网络出处 [{i + 1}] <a href="{doc["link"]}" target="_blank">{doc["title"]}</a>  </summary>\n"""
+                     f"""{doc['snippet']}\n"""
+                     f"""</details>"""
+                     for i, doc in enumerate(rep)])
+                chatbot = list(chatbot)
+                chatbot[-1][-1] += source
+            yield chatbot, history, ''
             history[-1] = (history[-1][0].replace(yr, ''), history[-1][1])
+    
+    def paralle_api_call(self,params):
+        pass
+
+    def parallel_predict(self, input, local_chatbot1,local_chatbot2, parallel_history1=[],parallel_history2=[], net=False, search='bing', search_key='', result_len='3', prompt='',
+                status=None, doc_type='faiss'):
+        """
+            Generates a response from the chatbot model given an input, mysql database and vector store if applicable.
+
+            Args:
+                self: The chat_base_model object itself.
+                doc0 (str): The vector store selected.
+                input (str): The input text.
+                chatbot (list): The chatbot list.
+                history (list): The history list.
+                prompt (str): The prompt string.
+                net (bool): Whether to perform internet search.
+                search (str, optional): The search string. Default is None.
+                search_key (str, optional): The search key string. Default is None.
+                result_len (int, optional): The length of search results. Default is None.
+                host (str): The host string.
+                user (str): The sql username.
+                password (str): The sql password string.
+                port (str): The sql port string.
+                type (str, optional): The vecotr store type string. Default is 'faiss'.
+                selected_database (str, optional): The selected sql database string. Default is None.
+                selected_table (str, optional): The selected sql table string. Default is None.
+
+            Yields: Tuple: A tuple containing the updated chatbot list, include the newly generated response,
+            history list, and an empty string.
+        """
+        prompt1 = ""
+        prompt2 = ""
+        if input == '':
+            raise gr.Error("请输入问题")
+        if net and search_key == '':
+            raise gr.Error("请输入search_key")
+        elif net and search != '':
+            internet = internet_search()
+            internet.set_v(search=search, key=search_key,
+                           result_len=result_len)
+            answer, rep = internet.search_text(input)
+            if not answer == '':
+                fact_prompt = f'This following message is relative context searched from internet:\nInformation:{answer}'
+                prompt1 = prompt + '\n' + fact_prompt
+                prompt2 = prompt + '\n' + fact_prompt
+        chatbot1_doc = status.Chatbot1[0]
+        chatbot2_doc = status.Chatbot2[0]
+
+        if chatbot1_doc is not None:
+            if doc_type == 'faiss':
+                from ui.chat import parallel_local_model
+                if parallel_local_model.chatbot1_vector_store != None:
+                    lo_doc, resp1 = parallel_local_model.chatbot1_vector_store.get_similarity(input)
+                    prompt1 = prompt1 + '\n' + lo_doc
+            else:
+                pass
+        if chatbot2_doc is not None:
+            if doc_type == 'faiss':
+                from ui.chat import parallel_local_model
+                if parallel_local_model.chatbot2_vector_store != None:
+                    lo_doc, resp2 = parallel_local_model.chatbot2_vector_store.get_similarity(input)
+                    prompt2 = prompt2 + '\n' + lo_doc
+            else:
+                pass
+
+
+        yr1 = prompt1 + '\n'
+        yr2 = prompt2 + '\n'
+        local_chatbot1.append((parse_text(input), ""))
+        local_chatbot2.append((parse_text(input), ""))
+        newi1 = yr1 + input
+        newi2 = yr2 + input
+        for response, parallel_history1 in self.llm._call(prompt=newi1, history=parallel_history1, streaming=True):
+            local_chatbot1[-1] = [parse_text(input), parse_text(response)]
+            yield local_chatbot1,local_chatbot2, parallel_history1,parallel_history2, ''
+
+        for response, parallel_history2 in self.llm._call(prompt=newi2, history=parallel_history2, streaming=True):
+            local_chatbot2[-1] = [parse_text(input), parse_text(response)]
+            yield local_chatbot1,local_chatbot2, parallel_history1,parallel_history2, ''
+
+        if chatbot1_doc is not None:
+            if parallel_local_model.chatbot1_vector_store != None:
+                source = "\n\n"
+                source += "".join(
+                    [
+                        f"""<details> <summary> 知识库出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}  </summary>\n"""
+                        f"""{doc.page_content}\n"""
+                        f"""</details>"""
+                        for i, doc in enumerate(resp1)])
+                local_chatbot1[-1][-1] += source
+        if chatbot2_doc is not None:
+            if parallel_local_model.chatbot2_vector_store != None:
+                source = "\n\n"
+                source += "".join(
+                    [
+                        f"""<details> <summary> 知识库出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}  </summary>\n"""
+                        f"""{doc.page_content}\n"""
+                        f"""</details>"""
+                        for i, doc in enumerate(resp2)])
+                local_chatbot2[-1][-1] += source
+        if net and not answer == '':
+            source = "\n\n"
+            source += "".join(
+                [
+                    f"""<details> <summary> 网络出处 [{i + 1}] <a href="{doc["link"]}" target="_blank">{doc["title"]}</a>  </summary>\n"""
+                    f"""{doc['snippet']}\n"""
+                    f"""</details>"""
+                    for i, doc in enumerate(rep)])
+            local_chatbot1[-1][-1] += source
+            local_chatbot2[-1][-1] += source
+        yield local_chatbot1,local_chatbot2, parallel_history1,parallel_history2, ''
+        parallel_history1[-1] = (parallel_history1[-1][0].replace(yr1, ''), parallel_history1[-1][1])
+        parallel_history2[-1] = (parallel_history2[-1][0].replace(yr2, ''), parallel_history2[-1][1])
 
 
 class llm_train_thread(threading.Thread):
     '''
     Thread class enables stop and restart of model trainning.
     '''
-
 
     def __init__(self, event):
         super().__init__()
@@ -1121,7 +1305,8 @@ class llm_train():
             checkpoints = []
             real_path = os.path.split(os.path.realpath(__file__))[0]
             if os.path.exists(os.path.join(real_path, "..", 'models', 'LoRA')):
-                dirs = os.listdir(os.path.join(real_path,"..",'models', 'LoRA'))
+                dirs = os.listdir(os.path.join(
+                    real_path, "..", 'models', 'LoRA'))
             else:
                 dirs = []
             for checkpoint in dirs:
@@ -1151,20 +1336,18 @@ class llm_train():
 
                 self.accelerate_config["use_cpu"] = False
 
-    def get_directories(self,path, unuse):
+    def get_directories(self, path, unuse):
         return [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d)) and d not in unuse]
+
     def handle_refresh_embd_and_data(self):
 
         real_path = os.path.split(os.path.realpath(__file__))[0]
         new_path = os.path.join(real_path, "..", "models", "Embedding")
         embs = self.get_directories(new_path, [])
-        new_path = os.path.join(real_path, "..", "data", 'modeldata', "Embedding")
+        new_path = os.path.join(real_path, "..", "data",
+                                'modeldata', "Embedding")
         emb_datas = self.get_directories(new_path, [])
-        if emb_datas != []:
-            label = "Choice train data"
-        else:
-            label = "Choice train data  (请先在data页面上传数据)"
-        return gr.update(choices = embs),gr.update(choices = emb_datas, label = label)
+        return gr.update(choices=embs), gr.update(choices=emb_datas)
 
     @staticmethod
     def detect_OS():
@@ -1298,7 +1481,6 @@ class llm_train():
         The general method used to load config info from webui to local config file, and start the train.
         """
 
-
         if LLM_data1 is None:
             raise gr.Error('没有选择数据集')
         if os.path.exists(os.path.join(real_path, '..', 'flag.txt')):
@@ -1408,10 +1590,10 @@ class llm_train():
         """
         Method write all train config info to local.
         """
-        with open(os.path.join(self.path,"..","data","config","train_config","accelerate_config.yaml"), "w", encoding="utf-8") as f:
+        with open(os.path.join(self.path, "..", "data", "config", "train_config", "accelerate_config.yaml"), "w", encoding="utf-8") as f:
             yaml.dump(data=self.accelerate_config,
                       stream=f, allow_unicode=True)
-        with open(os.path.join(self.path,"..","data","config","train_config","deepspeed_config.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(self.path, "..", "data", "config", "train_config", "deepspeed_config.json"), "w", encoding="utf-8") as f:
             f.write(json.dumps(self.deepspeed_config,
                     ensure_ascii=False, indent=4))
         print("Configuration Wrote")
@@ -1448,7 +1630,7 @@ class llm_train():
         """
         Method writes loaded train hyperparameters to local file.
         """
-        with open(os.path.join(self.path,"..","data", "config", "train_config", "model_hyperparam_config.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(self.path, "..", "data", "config", "train_config", "model_hyperparam_config.json"), "w", encoding="utf-8") as f:
             f.write(json.dumps(self.model_hyperparam_config,
                     ensure_ascii=False, indent=4))
         print("Model Configuration Wrote")
@@ -1460,9 +1642,7 @@ class llm_train():
         new_path = os.path.join(real_path, "..", "data", 'modeldata', "LLM")
         LLM_datas = self.get_directories(new_path, [])
 
-
-        return gr.update(choices = models),gr.update(choices = LLM_datas)
-
+        return gr.update(choices=models), gr.update(choices=LLM_datas)
 
 
 class train_thread(threading.Thread):
@@ -1472,7 +1652,7 @@ class train_thread(threading.Thread):
         self.embedding_bm = embedding_base_model()
         self.queue = queue.Queue()
 
-    def setv(self, model_name,embed_arch, data_dir, device, batch_size, max_steps, save_steps, learning_rate, embed_logging_epochs, save_dir, epochs, weight_decay, warmup_ratio, eps, gradient_accumulation_steps):
+    def setv(self, model_name, embed_arch, data_dir, device, batch_size, max_steps, save_steps, learning_rate, embed_logging_epochs, save_dir, epochs, weight_decay, warmup_ratio, eps, gradient_accumulation_steps):
         self.model_name = model_name
         self.embed_arch = embed_arch
         self.data_dir = data_dir
@@ -1530,7 +1710,7 @@ class train_thread(threading.Thread):
 
         self.embedding_bm.clear()
         self.embedding_bm.load(
-            model_name_or_path=model_name_or_path, embed_arch=self.embed_arch,device=device)
+            model_name_or_path=model_name_or_path, embed_arch=self.embed_arch, device=device)
         if not self.stopped():
             for _, training_details in self.embedding_bm.train(logging_epochs=self.embed_logging_epochs, num_epochs=self.epochs, train_file=train_file, output_dir=save_dir, eval_file=valid_file, batch_size=self.batch_size, max_steps=self.max_steps, lr=self.learning_rate, weight_decay=self.weight_decay, warmup_ratio=self.warmup_ratio, eps=self.eps, gradient_accumulation_steps=self.gradient_accumulation_steps, final_model=final_model):
                 self.queue.put(training_details)
@@ -1544,14 +1724,14 @@ class embedding_train_utils():
         self.event = threading.Event()
         self.train_thread = train_thread(self.event)
 
-    def start_train(self, model_name,embed_arch, data_dir, device, batch_size, max_steps, save_steps, learning_rate, embed_logging_epochs, save_dir, epochs, weight_decay, warmup_ratio, eps, gradient_accumulation_steps):
+    def start_train(self, model_name, embed_arch, data_dir, device, batch_size, max_steps, save_steps, learning_rate, embed_logging_epochs, save_dir, epochs, weight_decay, warmup_ratio, eps, gradient_accumulation_steps):
         if model_name is None:
             raise gr.Error('请选择模型')
         if embed_arch is None:
             raise gr.Error('请选择模型架构')
         if data_dir is None:
             raise gr.Error('请选择数据集')
-        self.train_thread.setv(model_name, embed_arch,data_dir, device, batch_size, max_steps, save_steps, learning_rate,
+        self.train_thread.setv(model_name, embed_arch, data_dir, device, batch_size, max_steps, save_steps, learning_rate,
                                embed_logging_epochs, save_dir, epochs, weight_decay, warmup_ratio, eps, gradient_accumulation_steps)
         self.train_thread.start()
         outs = ''
@@ -1587,16 +1767,18 @@ class embedding_train_utils():
 
 def handle_online_tts(choice):
     if choice == "在线":
-        return gr.update(choices = ["中文","英语","日语"])
+        return gr.update(choices=["中文", "英语", "日语"])
     else:
-        return gr.update(choices = ["中文"])
-    
+        return gr.update(choices=["中文"])
+
+
 def load_javascript():
     GradioTemplateResponseOriginal = gr.routes.templates.TemplateResponse
     print("loading javascript...")
     js = '''
     <script src="file=data/config/js/custom.js"></script>
     '''
+
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
         res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))

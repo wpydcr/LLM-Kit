@@ -1,14 +1,100 @@
 import time
 import openai
-from dotenv import load_dotenv
-from modules.agent.chatdb.config import Config
-from modules.agent.chatdb.token_counter import count_message_tokens
-from modules.agent.chatdb.chatgpt import create_chat_completion
-from modules.agent.chatdb.logger import logger
-import logging
+import tiktoken
+from typing import List, Dict
+import openai
+from langchain.schema import HumanMessage, SystemMessage
 
-cfg = Config()
+def create_chat_completion(messages, model=None, llm_name=None) -> str:
+    """Create a chat completion using the OpenAI API"""
+    response = None
+    num_retries = 5
+    for attempt in range(num_retries):
+        try:
+            if llm_name == 'openai' or llm_name == 'azure openai':
+                response = model.get_ones([SystemMessage(content=messages[0]['content']),HumanMessage(content=messages[1]['content'])])
+            elif llm_name == 'ernie bot' or llm_name == 'ernie bot turbo' or llm_name == 'chatglm api' or llm_name == 'spark api' or llm_name == 'ali api':
+                response = model.get_ones(messages[0]['content']+'\n'+messages[1]['content'])
+            else:
+                for response,_ in model._call(messages[0]['content']+'\n'+messages[1]['content'],history=[],streaming=False):
+                    pass
+                response = {
+                    'status':0,
+                    'message':response
+                }
+            break
+        except openai.error.RateLimitError:
+            time.sleep(20)
+        except openai.error.APIError as e:
+            if e.http_status == 502:
+                time.sleep(20)
+            else:
+                raise
+            if attempt == num_retries - 1:
+                raise
+        except openai.error.InvalidRequestError:
+            raise
 
+    if response is None:
+        raise RuntimeError("Failed to get response after 5 retries")
+
+    return response
+
+def count_message_tokens(messages : List[Dict[str, str]], model : str = "gpt-3.5-turbo-0301") -> int:
+    """
+    Returns the number of tokens used by a list of messages.
+
+    Args:
+    messages (list): A list of messages, each of which is a dictionary containing the role and content of the message.
+    model (str): The name of the model to use for tokenization. Defaults to "gpt-3.5-turbo-0301".
+
+    Returns:
+    int: The number of tokens used by the list of messages.
+    """
+    try:
+        encoding = tiktoken.encoding_for_model(model)
+    except KeyError:
+        print("Warning: model not found. Using cl100k_base encoding.")
+        encoding = tiktoken.get_encoding("cl100k_base")
+    if model == "gpt-3.5-turbo":
+        # !Node: gpt-3.5-turbo may change over time. Returning num tokens assuming gpt-3.5-turbo-0301.")
+        return count_message_tokens(messages, model="gpt-3.5-turbo-0301")
+    elif model == "gpt-4":
+        # !Note: gpt-4 may change over time. Returning num tokens assuming gpt-4-0314.")
+        return count_message_tokens(messages, model="gpt-4-0314")
+    elif model == "gpt-3.5-turbo-0301":
+        tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
+        tokens_per_name = -1  # if there's a name, the role is omitted
+    elif model == "gpt-4-0314":
+        tokens_per_message = 3
+        tokens_per_name = 1
+    else:
+        raise NotImplementedError(f"""num_tokens_from_messages() is not implemented for model {model}. See https://github.com/openai/openai-python/blob/main/chatml.md for information on how messages are converted to tokens.""")
+    num_tokens = 0
+    for message in messages:
+        num_tokens += tokens_per_message
+        for key, value in message.items():
+            num_tokens += len(encoding.encode(value))
+            if key == "name":
+                num_tokens += tokens_per_name
+    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
+    return num_tokens
+
+
+def count_string_tokens(string: str, model_name: str = "gpt-3.5-turbo-0301") -> int:
+    """
+    Returns the number of tokens in a text string.
+
+    Args:
+    string (str): The text string.
+    model_name (str): The name of the encoding to use. (e.g., "gpt-3.5-turbo")
+
+    Returns:
+    int: The number of tokens in the text string.
+    """
+    encoding = tiktoken.encoding_for_model(model_name)
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
 
 def create_chat_message(role, content):
     """
@@ -67,7 +153,7 @@ def chat_with_ai(
             Returns:
             str: The AI's response.
             """
-            model = cfg.fast_llm_model  # TODO: Change model from hardcode to argument
+            model = 'gpt-3.5-turbo'  # TODO: Change model from hardcode to argument
             # Reserve 1000 tokens for the response
 
             send_token_limit = token_limit - 1000
@@ -131,24 +217,16 @@ def chat_with_ai(
                 model=llm,
                 llm_name=llm_name,
                 messages=current_context,
-                max_tokens=tokens_remaining,
             )
 
-            # Update full message history
-            full_message_history.append(create_chat_message("user", user_input))
-            full_message_history.append(create_chat_message("assistant", assistant_reply))
-            # logger.debug(f"{full_message_history[-1]['role'].capitalize()}: {full_message_history[-1]['content']}")
-            # logger.debug("----------- END OF RESPONSE ----------------")
+            if assistant_reply['status'] == 0:
+                # Update full message history
+                full_message_history.append(create_chat_message("user", user_input))
+                full_message_history.append(create_chat_message("assistant", assistant_reply['message']))
+                # logger.debug(f"{full_message_history[-1]['role'].capitalize()}: {full_message_history[-1]['content']}")
+                # logger.debug("----------- END OF RESPONSE ----------------")
             return assistant_reply
         except openai.error.RateLimitError:
             # TODO: When we switch to langchain, this is built in
             print("Error: ", "API Rate Limit Reached. Waiting 10 seconds...")
             time.sleep(10)
-
-
-if __name__ == '__main__':
-    cfg.set_debug_mode(False)
-    full_msg_history = []
-    while True:
-        user_inp = input()
-        chat_with_ai("You are ChatDB.", user_inp, full_msg_history, None, 1100)

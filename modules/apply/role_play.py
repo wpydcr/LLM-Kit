@@ -98,10 +98,14 @@ class role_play():
         self.model_use=params['name']
         if self.model_use == 'openai':
             self.llm=openai_api()
-            self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get('prompt',''),port=params['port'])
+            response = self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get('prompt',''),port=params['port'])
+            if response['status'] == -1:
+                raise gr.Error(response['message'])
         elif self.model_use == 'azure openai':
             self.llm=openai_api()
-            self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get('prompt',''),type='azure',endpoint=params['endpoint'],engine=params['engine'])
+            response = self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get('prompt',''),type='azure',endpoint=params['endpoint'],engine=params['engine'])
+            if response['status'] == -1:
+                raise gr.Error(response['message'])
         else:
             self.llm = AutoLM()
             self.llm.load_model(max_length=params['max_length'], top_p=params['top_p'],temperature=params['temperature'],model_name=self.model_use,use_lora=(params['lora'] is not None),lora_name=params['lora'],use_4bit=True if params.get('quantization') == '4 bit' else False,use_8bit=True if params.get('quantization') == '8 bit' else False)
@@ -212,10 +216,7 @@ class role_play():
         description['text'] = text
         str = json.dumps(description, ensure_ascii=False)
         prompt = f'''This is a json file, which contains the images' file_name and descriptions, you need to choose one of images. Response with a single image's file_name.\n{str}'''
-        message = [
-            SystemMessage(content=role),
-            HumanMessage(content=prompt)
-        ]
+        message = [role, prompt]
 
         random_number = random.random()
         if random_number <= probability:
@@ -227,9 +228,18 @@ class role_play():
             return ''
         else:
             if self.model_use == 'openai' or self.model_use == 'azure openai':
-                reply = self.llm.get_ones_openai(message)
+                message = [SystemMessage(content=message[0]),HumanMessage(content=message[1])]
+                reply = self.llm.get_ones(message)
+                if reply['status'] == -1:
+                    raise gr.Error(reply['message'])
+                reply = reply['message']
+            elif self.model_use == 'ernie bot' or self.model_use == 'ernie bot turbo' or self.model_use == 'chatglm api' or self.model_use == 'spark api' or self.model_use == 'ali api':
+                replys = self.llm.get_ones(message[0]+'\n'+message[1])
+                if reply['status'] == -1:
+                    raise gr.Error(reply['message'])
+                reply = reply['message']
             else:
-                replys = self.llm._call(prompt=message, history=[['','']], streaming=False)
+                replys = self.llm._call(prompt=message[0]+'\n'+message[1], history=[['','']], streaming=False)
                 for reply,_ in replys:
                     pass
             for image in description["images"]:
@@ -298,14 +308,18 @@ class role_play():
         if self.model_use == 'openai' or self.model_use == 'azure openai':
             self.history.messages.append(message)
             messages.extend(self.history.messages)
-            replys = self.llm.get_ones_openai(messages)
-            # for reply in replys:
-            #     yield reply
+            replys = self.llm.get_ones(messages)
+            if replys['status'] == -1:
+                raise gr.Error(replys['message'])
+            replys = replys['message']
+        elif self.model_use == 'ernie bot' or self.model_use == 'ernie bot turbo' or self.model_use == 'chatglm api' or self.model_use == 'spark api' or self.model_use == 'ali api':
+            replys = self.llm.get_ones('\n'.join([i.content for i in messages]))
+            if replys['status'] == -1:
+                raise gr.Error(replys['message'])
+            replys = replys['message']
         else:
-            for replys,history in self.llm._call(prompt=''.join([i.content for i in messages])+'\n请回复以下问题'+text, history=[[self.history.messages[i*2].content,self.history.messages[i*2+1].content] for i in range(int(len(self.history.messages)/2))], streaming=False):
+            for replys,_ in self.llm._call(prompt=''.join([i.content for i in messages])+'\n请回复以下问题'+text, history=[[self.history.messages[i*2].content,self.history.messages[i*2+1].content] for i in range(int(len(self.history.messages)/2))], streaming=False):
                 pass
-            # for reply,_ in replys:
-            #     yield reply
             self.history.messages.append(message)
         reply = ''.join(replys)
         self.history.add_ai_message(reply)

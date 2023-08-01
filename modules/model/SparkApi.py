@@ -90,19 +90,25 @@ class Spark_Api(object):
         self.ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
         while True:
             text = self.queue.get()
-            if text is None:
+            if text['status'] == 0 and text['message'] is None:
                 break
             yield text
+            if text['status'] == -1:
+                break
 
     # 收到websocket错误的处理
     def on_error(self, ws, error):
-        raise gr.Error("Spark API error")
-        # print("### error:", error)
+        self.queue.put({
+            'status': -1,
+            'message': str(error)
+        })
 
     # 收到websocket关闭的处理
     def on_close(self, ws, *args):
-        raise gr.Error("Spark API error")
-        print("### closed ###")
+        self.queue.put({
+            'status': -1,
+            'message': 'websocket closed'
+        })
 
     # 收到websocket连接建立的处理
     def on_open(self, ws, *args):
@@ -119,15 +125,24 @@ class Spark_Api(object):
         code = data['header']['code']
         if code != 0:
             # print(f'请求错误: {code}, {data}')
-            raise gr.Error("Spark API error")
             ws.close()
+            self.queue.put({
+                'status': -1,
+                'message': message
+            })
         else:
             choices = data["payload"]["choices"]
             status = choices["status"]
             content = choices["text"][0]["content"]
-            self.queue.put(content)
+            self.queue.put({
+                'status': 0,
+                'message': content
+            })
             if status == 2:
-                self.queue.put(None)
+                self.queue.put({
+                    'status': 0,
+                    'message': None
+                })
                 ws.close()
 
     def gen_params(self):
@@ -156,10 +171,3 @@ class Spark_Api(object):
             }
         }
         return data
-
-
-# if __name__ == '__main__':
-#     spark_api = Spark_Api()
-#     spark_api.create_ws()
-#     for text in spark_api._call([{"role": "user", "content": "你好"}]):
-#         print(text)

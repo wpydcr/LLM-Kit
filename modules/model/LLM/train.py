@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.realpath(__file__).split('LLM-Kit')[0]+'LLM-Kit')
+sys.path.append(os.path.realpath(__file__).split('caio_web')[0]+'caio_web')
 print(sys.path)
 import numpy as np
 import argparse
@@ -464,43 +464,68 @@ def main():
                         f.write(f'epochs: {epoch}, batch: {completed_steps}, loss: {np.mean(losses)}\n')
                     losses = []
                 if args.save_steps is not None and (completed_steps + 1) % args.save_steps == 0:
-                    best_metric, perplexity = save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, perplexity, tokenizer)
-        if os.path.exists(os.path.join(real_path,'..','..','..','flag.txt')):
+                    best_metric, perplexity = save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, perplexity, tokenizer,True)
+        if os.path.exists(os.path.join(real_path,'..','..','flag.txt')):
+
+            best_metric, perplexity = save_model(args, model, eval_dataloader, accelerator, epoch, best_metric,
+                                                 perplexity, tokenizer, False)
             print('Stopped')
             break
-        best_metric, perplexity = save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, perplexity, tokenizer)
+        best_metric, perplexity = save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, perplexity, tokenizer,False)
 
 
 
-def save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, perplexity, tokenizer):
-    if eval_dataloader is not None:
-        perplexity, eval_loss = evaluate(
-            args, model, eval_dataloader, accelerator)
-        logger.info(
-            "epoch {}: perplexity: {} eval_loss: {}".format(epoch, perplexity, eval_loss))
+def save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, perplexity, tokenizer,to_output):
+    if to_output:
+        real_path = os.path.split(os.path.realpath(__file__))[0]
+        name = os.path.split(args.output_dir)[-1]
+        output_path = os.path.join(real_path, "..", "..", "..", "output", "LLM",name)
 
-    # New Code #
-    # Tracks the best checkpoint and best metric
-    if best_metric is None or best_metric > perplexity:
         if eval_dataloader is not None:
-            best_metric = perplexity
-            accelerator.print(
-                "New best metric: {} at epoch {}".format(best_metric, epoch))
+            perplexity, eval_loss = evaluate(
+                args, model, eval_dataloader, accelerator)
+            logger.info(
+                "epoch {}: perplexity: {} eval_loss: {}".format(epoch, perplexity, eval_loss))
         accelerator.wait_for_everyone()
         unwrapped_model = accelerator.unwrap_model(model)
-        
+
         if accelerator.is_main_process:
             state = unwrapped_model.state_dict()
             unwrapped_model.save_pretrained(
-                args.output_dir,
+                output_path,
                 is_main_process=accelerator.is_main_process,
                 save_function=accelerator.save,
                 state_dict=state,
             )
             if not args.use_lora:
-                tokenizer.save_pretrained(args.output_dir)
-                copy_custom_files(args.model_path, args.output_dir)
+                tokenizer.save_pretrained(output_path)
+                copy_custom_files(args.model_path, output_path)
         accelerator.wait_for_everyone()
+
+    else:
+
+        # New Code #
+        # Tracks the best checkpoint and best metric
+        if best_metric is None or best_metric > perplexity:
+            if eval_dataloader is not None:
+                best_metric = perplexity
+                accelerator.print(
+                    "New best metric: {} at epoch {}".format(best_metric, epoch))
+            accelerator.wait_for_everyone()
+            unwrapped_model = accelerator.unwrap_model(model)
+
+            if accelerator.is_main_process:
+                state = unwrapped_model.state_dict()
+                unwrapped_model.save_pretrained(
+                    args.output_dir,
+                    is_main_process=accelerator.is_main_process,
+                    save_function=accelerator.save,
+                    state_dict=state,
+                )
+                if not args.use_lora:
+                    tokenizer.save_pretrained(args.output_dir)
+                    copy_custom_files(args.model_path, args.output_dir)
+            accelerator.wait_for_everyone()
     return best_metric, perplexity
 
 
