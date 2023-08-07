@@ -1,3 +1,3 @@
 @echo off
-.\env\python.exe webui.py cn
+D:\caio_web\env\python.exe webui.py cn
 pause
