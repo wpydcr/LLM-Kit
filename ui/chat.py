@@ -538,7 +538,7 @@ def chat_page(localizer):
                     api_selected_api = gr.Textbox(
                         label=localizer("已选择的模型"), lines=1, value=None, interactive=False)
                     api_stream = gr.Checkbox(label=localizer('流式输出'))
-                    api_prompt = gr.Textbox(value=localizer("请可爱的风格回答下述问题。"), lines=3,
+                    api_prompt = gr.Textbox(value=localizer("请用可爱的风格回答下述问题。"), lines=3,
                                             placeholder="Write Here...", label=localizer("提示词"), interactive=True)
                     use_knowledge = gr.Checkbox(label=localizer('使用知识库'))
                 with gr.Accordion(localizer('本地知识库'), open=True, visible=False) as api_local_knowledge:
@@ -621,12 +621,12 @@ def chat_page(localizer):
                         parallel_local_model_temperature = gr.Slider(
                             0, 1, value=0.95, step=0.05, label="Temperature", interactive=True,
                             elem_id='chat_model_temperature')
-                    parallel_local_model_prompt = gr.Textbox(value=localizer("请可爱的风格回答下述问题。"), lines=3,
+                    parallel_local_model_prompt = gr.Textbox(value=localizer("请用可爱的风格回答下述问题。"), lines=3,
                                         placeholder="Write Here...", label=localizer("提示词"), interactive=True)
                     parallel_local_model_save = gr.Button(localizer("确定"), variant="primary")
                     parallel_local_model_emptymodelBtn = gr.Button(localizer("清空"))
                 with gr.Accordion(localizer(localizer("使用知识库")), open=False):
-                    switch_chatbot = gr.Radio(["chatbot1","chatbot2"], label=localizer("选择Chatbot"), value=None)
+                    switch_chatbot = gr.Radio(["chatbot1","chatbot2"], label=localizer("清空"), value=None)
                     with gr.Tab(localizer("Embedding API")):
                         emb_api_list = gr.Radio(embedding_api, show_label=False, value=None)
                         with gr.Accordion(localizer('openai参数'), open=True, visible=False) as emb_openai_params:

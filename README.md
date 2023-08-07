@@ -39,8 +39,8 @@ $ pip install -r requirements.txt
 
 #### 2. 执行脚本
 
-+ win环境，双击打开 web-demo.bat 脚本
-+ Linux环境，双击打开 web-demo.sh 脚本
++ win环境，双击打开 web-demo-CN.bat 脚本
++ Linux环境，双击打开 web-demo-CN.sh 脚本
 
 #### 3. 相关演示文件
 
@@ -122,6 +122,7 @@ $ pip install -r requirements.txt
   - [ ] langchain
     - [x] 本地知识库
       - [x] FAISS
+      - [X] 本地模型知识库并行调用
     - [x] 网络接入
     - [x] [mysql数据库接入](https://github.com/huchenxucs/ChatDB)
     - [x] Agent 实现
@@ -152,7 +153,10 @@ $ pip install -r requirements.txt
         - [ ] 表情
         - [ ] 动作
         - [ ] 场景
+          - [X] live2d 场景自定义 
 - [ ] 增加 API 支持
+  - [X] LLM API 并行调用
+  - [X] LLM API 流式调用
   - [ ] 利用 fastapi 实现 API 部署方式
   - [ ] 实现调用 API 的 Web UI Demo
   - [ ] VUE 页面前端
@@ -165,10 +169,10 @@ $ pip install -r requirements.txt
 发起人，负责整体项目架构和技术规划
 
 ### [廖文彬 @中科院计算技术研究所](https://github.com/set-path)
-负责gradio，数据库，api接口集成等python开发
+负责gradio，图向量数据库，Mysql数据库，api接口集成等python开发
 
 ### [胡钜程 @伦敦大学学院UCL](https://github.com/smgjch)
-负责live2D，语音，gradio等python开发
+负责图向量数据库， live2D，vits, svc，gradio等python开发
 
 ### [李璟辉](https://github.com/JaheimLee)
 负责大模型训练与推理的后端代码开发

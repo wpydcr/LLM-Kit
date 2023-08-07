@@ -1,6 +1,6 @@
 import os
 import locale
-import commentjson as json
+import json
 
 real_path = os.path.split(os.path.realpath(__file__))[0]
 
