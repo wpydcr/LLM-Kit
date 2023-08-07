@@ -43,7 +43,7 @@ class AutoLM(LLM):
               streaming: bool = STREAMING):  # -> Tuple[str, List[List[str]]]:
         # history = history[-self.history_len:-1] if self.history_len > 0 else []
         if streaming:
-            if "chatglm-6b" == self.model_name or "chatglm2-6b" == self.model_name:
+            if "chatglm-6b" == self.model_name or "chatglm2-6b" == self.model_name or "chatglm2-6b-32k" == self.model_name:
                 if self.use_deepspeed:
                     stream_chat = self.model.module.stream_chat
                 else:
@@ -98,7 +98,7 @@ class AutoLM(LLM):
                         history[-1] = [prompt, streamer_text.strip()]
                     yield streamer_text.strip(), history
         else:
-            if "chatglm-6b" == self.model_name or "chatglm2-6b" == self.model_name:
+            if "chatglm-6b" == self.model_name or "chatglm2-6b" == self.model_name or "chatglm2-6b-32k" == self.model_name:
                 if self.use_deepspeed:
                     chat = self.model.module.chat
                 else:

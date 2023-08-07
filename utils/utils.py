@@ -33,7 +33,11 @@ def get_model_name(path):
 
 def copy_custom_files(source, target):
     model_name = get_model_name(source)
-    if "chatglm-6b" == model_name or 'chatglm2-6b' == model_name:
+    if (
+        "chatglm-6b" == model_name or 
+        "chatglm2-6b" == model_name or 
+        "chatglm2-6b-32k" == model_name
+    ):
         shutil.copy(os.path.join(source, "configuration_chatglm.py"), target)
         shutil.copy(os.path.join(source, "modeling_chatglm.py"), target)
         shutil.copy(os.path.join(source, "quantization.py"), target)
@@ -41,7 +45,8 @@ def copy_custom_files(source, target):
     elif (
         "phoenix-inst-chat-7b" == model_name or
         "Guanaco" == model_name or
-        "baichuan-vicuna-chinese-7b" == model_name
+        "baichuan-vicuna-chinese-7b" == model_name or
+        "chinese-alpaca-2-7b" == model_name
     ):
         pass
     elif "moss-moon-003-sft" == model_name:
@@ -109,7 +114,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             device_map=device_map,
             quantization_config=quantization_config, 
             torch_dtype=torch.float16)
-    elif "chatglm2-6b" == model_name:
+    elif "chatglm2-6b" == model_name or "chatglm2-6b-32k" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir='./', trust_remote_code=True)
         if max_length > config.seq_length:
             config.update({"seq_length": max_length})
@@ -199,6 +204,18 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             torch_dtype=torch.float16, trust_remote_code=True,
             quantization_config=quantization_config,
         )
+    elif "chinese-alpaca-2-7b" == model_name:
+        config = AutoConfig.from_pretrained(path, cache_dir='./')
+        if max_length > config.max_position_embeddings:
+            config.update({"max_position_embeddings": max_length})
+        tokenizer = AutoTokenizer.from_pretrained(path, cache_dir='./', use_fast=False)
+        model = AutoModelForCausalLM.from_pretrained(
+            path, config=config, cache_dir='./',
+            load_in_8bit=use_8bit,
+            device_map=device_map,
+            quantization_config=quantization_config,  
+            torch_dtype=torch.float16,
+            )
     else:
         raise NotImplementedError("Model is not implemented.")
     os.chdir(original_path)
@@ -209,9 +226,11 @@ def get_lora_model(model, path, lora_rank, checkpoint):
     if (
         "chatglm-6b" == model_name or
         "chatglm2-6b" == model_name or
+        "chatglm2-6b-32k" == model_name or
         "phoenix-inst-chat-7b" == model_name or
         "Guanaco" == model_name or
-        "baichuan-vicuna-chinese-7b" == model_name
+        "baichuan-vicuna-chinese-7b" == model_name or
+        "chinese-alpaca-2-7b" == model_name
     ):
         peft_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
@@ -263,7 +282,7 @@ def get_preprocess_datacollator(path):
     model_name = get_model_name(path)
     if "chatglm-6b" == model_name:
         return preprocess_4_chatglm, data_collator_4_chatglm
-    elif "chatglm2-6b" == model_name:
+    elif "chatglm2-6b" == model_name or "chatglm2-6b-32k" == model_name:
         return preprocess_4_chatglm2, data_collator_4_chatglm2
     elif "phoenix-inst-chat-7b" == model_name:
         return preprocess_4_phoenix, data_collator_4_phoenix
@@ -277,6 +296,8 @@ def get_preprocess_datacollator(path):
         return preprocess_4_baichuan_13b_chat, data_collator_4_baichuan_13b_chat
     elif "internlm-chat-7b-8k" == model_name:
         return preprocess_4_internlm, data_collator_4_internlm
+    elif "chinese-alpaca-2-7b" == model_name:
+        return preprocess_4_chinese_alpaca_2, data_collator_4_chinese_alpaca_2
     else:
         raise NotImplementedError("Model is not implemented.")
 
@@ -300,9 +321,17 @@ def build_query(path, tokenizer, question, history):
             query += "USER: {} ASSISTANT: {}{}".format(q, a, tokenizer.eos_token)
         query += "USER: {} ASSISTANT:".format(question)
     elif "internlm-chat-7b-8k" == model_name:
-        for q, a in history:
-            query += "<s><|User|>:{}<eoh>\n<|Bot|>:{}<eoa>\n".format(q, a)
-        query += "<s><|User|>:{}<eoh>\n<|Bot|>:".format(question)
+        for num, (q, a) in enumerate(history):
+            start_token = "" if num == 0 else tokenizer.bos_token
+            query += "{}<|User|>:{}<eoh>\n<|Bot|>:{}<eoa>\n".format(start_token, q, a)
+        start_token = "" if query == "" else tokenizer.bos_token
+        query += "{}<|User|>:{}<eoh>\n<|Bot|>:".format(start_token, question)
+    elif "chinese-alpaca-2-7b" == model_name:
+        for num, (q, a) in enumerate(history):
+            start_token = "" if num == 0 else tokenizer.bos_token
+            query += "{}[INST] {} [/INST] {}{}".format(start_token, q, a, tokenizer.eos_token)
+        start_token = "" if query == "" else tokenizer.bos_token
+        query += "{}[INST] {} [/INST]".format(start_token, question)
     else:
         raise NotImplementedError("Model is not implemented.")
     return query
@@ -509,3 +538,14 @@ def preprocess_4_internlm(example, tokenizer, max_length):
     }
 
 data_collator_4_internlm = data_collator_4_phoenix
+
+
+# --------------- chinese-alpaca-2 ---------------
+def preprocess_4_chinese_alpaca_2(example, tokenizer, max_length):
+    question = example["question"]
+    answer = example["answer"]
+    user_prompt = """[INST] {} [/INST] """.format(question)
+    full_prompt = user_prompt + answer
+    return build_tokens(full_prompt, user_prompt, tokenizer, max_length)
+
+data_collator_4_chinese_alpaca_2 = data_collator_4_phoenix
