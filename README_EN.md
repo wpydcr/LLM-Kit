@@ -39,9 +39,9 @@ $ pip install -r requirements.txt
 
 #### 2. Execute the script
 
-+ For windows，double click web-demo.bat to run.
++ For windows，double click web-demo-EN.bat to run.
 
-+ For Linux，double click web-demo.sh to run.
++ For Linux，double click web-demo-EN.sh to run.
 
 #### 3. Relavant pre-built content
 
@@ -122,6 +122,7 @@ $ pip install -r requirements.txt
   - [ ] langchain
     - [x] Local Knowledge base
       - [x] FAISS
+      - [x] Local knowledge base parallel call for local LLM
     - [x] Internet connection
     - [x] [mysql database connection](https://github.com/huchenxucs/ChatDB)
     - [x] Agent implement
@@ -152,7 +153,10 @@ $ pip install -r requirements.txt
         - [ ] Emotion
         - [ ] movement
         - [ ] Field
+          - [X] Customized background
 - [ ] Add API Support
+  - [X] LLM API Parallel call
+  - [X] LLM API Streaming model
   - [ ] Deploy API by fastapi
   - [ ] Implement WEB UI Demo by API call
   - [ ] VUE Webui
@@ -165,10 +169,10 @@ $ pip install -r requirements.txt
 Initiator, responsible for overall project architecture and technical planning
 
 ### [廖文彬 @中科院计算技术研究所](https://github.com/set-path)
-Responsible for python development of gradio, database, api interface integration, etc.
+Responsible for python development of gradio, graph vector database, database, api interface integration, etc.
 
 ### [胡钜程 @伦敦大学学院UCL](https://github.com/smgjch)
-Responsible for python development for live2D, voice, gradio, etc.
+Responsible for python development for graph vector database, live2D, vits, svc, gradio, etc.
 
 ### [李璟辉](https://github.com/JaheimLee)
 Responsible for back-end development of LLM training and inference
