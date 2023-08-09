@@ -62,6 +62,11 @@ def copy_custom_files(source, target):
         shutil.copy(os.path.join(source, "configuration_internlm.py"), target)
         shutil.copy(os.path.join(source, "modeling_internlm.py"), target)
         shutil.copy(os.path.join(source, "tokenization_internlm.py"), target)
+    elif "Qwen-7B-Chat" == model_name:
+        shutil.copy(os.path.join(source, "configuration_qwen.py"), target)
+        shutil.copy(os.path.join(source, "modeling_qwen.py"), target)
+        shutil.copy(os.path.join(source, "tokenization_qwen.py"), target)
+        shutil.copy(os.path.join(source, "qwen_generation_utils.py"), target)
     else:
         raise NotImplementedError("Model is not implemented.")
 
@@ -186,36 +191,65 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
         )
         tokenizer.pad_token_id = model.config.pad_token_id
     elif "Baichuan-13B-Chat" == model_name:
+        config = AutoConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
+        if max_length > config.model_max_length:
+            config.update({"model_max_length": max_length})
         tokenizer = AutoTokenizer.from_pretrained(
-            path, use_fast=False, trust_remote_code=True, cache_dir='./'
+            path, use_fast=False, trust_remote_code=True, cache_dir="./"
             )
-        model = AutoModelForCausalLM.from_pretrained(
-            path, device_map=device_map, load_in_8bit=use_8bit, cache_dir='./',
-            torch_dtype=torch.float16, trust_remote_code=True,
-            quantization_config=quantization_config,
-        )
-        model.generation_config = GenerationConfig.from_pretrained(path, cache_dir='./')
-    elif "internlm-chat-7b-8k" == model_name:
-        tokenizer = AutoTokenizer.from_pretrained(
-            path, use_fast=False, trust_remote_code=True, cache_dir='./'
-            )
-        model = AutoModelForCausalLM.from_pretrained(
-            path, device_map=device_map, load_in_8bit=use_8bit, cache_dir='./',
-            torch_dtype=torch.float16, trust_remote_code=True,
-            quantization_config=quantization_config,
-        )
-    elif "chinese-alpaca-2-7b" == model_name:
-        config = AutoConfig.from_pretrained(path, cache_dir='./')
-        if max_length > config.max_position_embeddings:
-            config.update({"max_position_embeddings": max_length})
-        tokenizer = AutoTokenizer.from_pretrained(path, cache_dir='./', use_fast=False)
         model = AutoModelForCausalLM.from_pretrained(
             path, config=config, cache_dir='./',
+            trust_remote_code=True,
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config,  
             torch_dtype=torch.float16,
             )
+        model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
+    elif "internlm-chat-7b-8k" == model_name:
+        config = AutoConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
+        if max_length > config.max_position_embeddings:
+            config.update({"max_position_embeddings": max_length})
+        tokenizer = AutoTokenizer.from_pretrained(
+            path, use_fast=False, trust_remote_code=True, cache_dir="./"
+            )
+        model = AutoModelForCausalLM.from_pretrained(
+            path, config=config, cache_dir='./',
+            trust_remote_code=True,
+            load_in_8bit=use_8bit,
+            device_map=device_map,
+            quantization_config=quantization_config,  
+            torch_dtype=torch.float16,
+            )
+    elif "chinese-alpaca-2-7b" == model_name:
+        config = AutoConfig.from_pretrained(path, cache_dir="./")
+        if max_length > config.max_position_embeddings:
+            config.update({"max_position_embeddings": max_length})
+        tokenizer = AutoTokenizer.from_pretrained(path, cache_dir="./", use_fast=False)
+        model = AutoModelForCausalLM.from_pretrained(
+            path, config=config, cache_dir="./",
+            load_in_8bit=use_8bit,
+            device_map=device_map,
+            quantization_config=quantization_config,  
+            torch_dtype=torch.float16,
+            )
+    elif "Qwen-7B-Chat" == model_name:
+        config = AutoConfig.from_pretrained(path, cache_dir="./", trust_remote_code=True)
+        config.fp16 = True
+        if use_4bit or use_8bit:
+            config.use_flash_attn = False
+        if max_length > config.n_positions:
+            config.update({"n_positions": max_length})
+        tokenizer = AutoTokenizer.from_pretrained(
+            path, cache_dir="./", trust_remote_code=True, 
+            pad_token="<|endoftext|>", eos_token="<|im_end|>", bos_token="<|im_start|>"
+        )
+        model = AutoModelForCausalLM.from_pretrained(
+            path, config=config, device_map=device_map, load_in_8bit=use_8bit, 
+            cache_dir="./", torch_dtype=torch.float16, trust_remote_code=True,
+            quantization_config=quantization_config,
+        )
+        model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
     else:
         raise NotImplementedError("Model is not implemented.")
     os.chdir(original_path)
@@ -225,49 +259,31 @@ def get_lora_model(model, path, lora_rank, checkpoint):
     model_name = get_model_name(path)
     if (
         "chatglm-6b" == model_name or
-        "chatglm2-6b" == model_name or
         "chatglm2-6b-32k" == model_name or
-        "phoenix-inst-chat-7b" == model_name or
+        "phoenix-inst-chat-7b-v1.1" == model_name or
         "Guanaco" == model_name or
         "baichuan-vicuna-chinese-7b" == model_name or
         "chinese-alpaca-2-7b" == model_name
     ):
-        peft_config = LoraConfig(
-            task_type=TaskType.CAUSAL_LM,
-            inference_mode=False,
-            r=lora_rank,
-            lora_alpha=32,
-            lora_dropout=0.1
-        )
+        target_modules = None
     elif "moss-moon-003-sft" == model_name:
-        peft_config = LoraConfig(
-            task_type=TaskType.CAUSAL_LM,
-            inference_mode=False,
-            r=lora_rank,
-            lora_alpha=32,
-            lora_dropout=0.1,
-            target_modules=["qkv_proj"]
-        )
+        target_modules = ["qkv_proj"]
     elif "Baichuan-13B-Chat" == model_name:
-        peft_config = LoraConfig(
-            task_type=TaskType.CAUSAL_LM,
-            inference_mode=False,
-            r=lora_rank,
-            lora_alpha=32,
-            lora_dropout=0.1,
-            target_modules=["W_pack"]
-        )
+        target_modules = ["W_pack"]
     elif "internlm-chat-7b-8k" == model_name:
-        peft_config = LoraConfig(
-            task_type=TaskType.CAUSAL_LM,
-            inference_mode=False,
-            r=lora_rank,
-            lora_alpha=32,
-            lora_dropout=0.1,
-            target_modules=["q_proj", "k_proj"]
-        )
+        target_modules = ["q_proj", "k_proj"]
+    elif "Qwen-7B-Chat" == model_name:
+        target_modules = ["c_attn"]
     else:
         raise NotImplementedError("Model is not implemented.")
+    peft_config = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            inference_mode=False,
+            r=lora_rank,
+            lora_alpha=32,
+            lora_dropout=0.1,
+            target_modules=target_modules
+        )
     model = get_peft_model(model, peft_config)
     if checkpoint is not None:
         model = PeftModel.from_pretrained(model, checkpoint)
@@ -298,6 +314,8 @@ def get_preprocess_datacollator(path):
         return preprocess_4_internlm, data_collator_4_internlm
     elif "chinese-alpaca-2-7b" == model_name:
         return preprocess_4_chinese_alpaca_2, data_collator_4_chinese_alpaca_2
+    elif "Qwen-7B-Chat" == model_name:
+        return preprocess_4_qwen, data_collator_4_qwen
     else:
         raise NotImplementedError("Model is not implemented.")
 
@@ -549,3 +567,14 @@ def preprocess_4_chinese_alpaca_2(example, tokenizer, max_length):
     return build_tokens(full_prompt, user_prompt, tokenizer, max_length)
 
 data_collator_4_chinese_alpaca_2 = data_collator_4_phoenix
+
+
+# --------------- Qwen ---------------
+def preprocess_4_qwen(example, tokenizer, max_length):
+    question = example["question"]
+    answer = example["answer"]
+    user_prompt = """<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n""".format(question)
+    full_prompt = user_prompt + answer
+    return build_tokens(full_prompt, user_prompt, tokenizer, max_length)
+
+data_collator_4_qwen= data_collator_4_phoenix

@@ -7,7 +7,7 @@ import deepspeed
 import torch
 from peft import PeftModel
 from threading import Thread
-from transformers import TextIteratorStreamer
+from transformers import TextIteratorStreamer, GenerationConfig
 from typing import List, Dict, Optional, Union
 from langchain.llms.base import LLM
 
@@ -29,6 +29,7 @@ class AutoLM(LLM):
     device = DEVICE_
     use_deepspeed: bool = False
     do_sample = False
+    repetition_penalty = 1.1
 
     def __init__(self):
         super().__init__()
@@ -42,6 +43,10 @@ class AutoLM(LLM):
               history: List[List[str]] = [],
               streaming: bool = STREAMING):  # -> Tuple[str, List[List[str]]]:
         # history = history[-self.history_len:-1] if self.history_len > 0 else []
+        gen_kwargs = {"max_length": self.max_token,  "do_sample": self.do_sample, "top_p": self.top_p, 
+              "temperature": self.temperature, "repetition_penalty": self.repetition_penalty, "renormalize_logits": True,
+              "length_penalty": 0, "pad_token_id": self.tokenizer.pad_token_id}
+        generation_config = GenerationConfig(**gen_kwargs)
         if streaming:
             if "chatglm-6b" == self.model_name or "chatglm2-6b" == self.model_name or "chatglm2-6b-32k" == self.model_name:
                 if self.use_deepspeed:
@@ -56,6 +61,22 @@ class AutoLM(LLM):
                         temperature=self.temperature,
                         top_p=self.top_p,
                         do_sample=self.do_sample
+                )):
+                    if inum == 0:
+                        history = history + [[prompt, stream_resp]]
+                    else:
+                        history[-1] = [prompt, stream_resp]
+                    yield stream_resp, history
+            elif "Qwen-7B-Chat" == self.model_name:
+                if self.use_deepspeed:
+                    stream_chat = self.model.module.chat_stream
+                else:
+                    stream_chat = self.model.chat_stream
+                for inum, stream_resp in enumerate(stream_chat(
+                        self.tokenizer,
+                        prompt,
+                        history=history,
+                        generation_config=generation_config
                 )):
                     if inum == 0:
                         history = history + [[prompt, stream_resp]]
@@ -83,7 +104,7 @@ class AutoLM(LLM):
                 eos_token_id = self.tokenizer.eos_token_id
                 if "internlm-chat-7b-8k" ==  self.model_name:
                     eos_token_id = [2, 103028]
-                generation_kwargs = {**inputs, "max_length": self.max_token, "do_sample": self.do_sample, "streamer": streamer, "temperature": self.temperature, "top_p": self.top_p, "pad_token_id": self.tokenizer.pad_token_id, "eos_token_id": eos_token_id}
+                generation_kwargs = {**inputs, "streamer": streamer, "eos_token_id": eos_token_id, "generation_config": generation_config}
                 thread = Thread(target=self.model.generate,
                                 kwargs=generation_kwargs)
                 thread.start()
@@ -93,10 +114,10 @@ class AutoLM(LLM):
                         new_text = new_text.replace("<eoa>", "")
                     streamer_text += new_text
                     if inum == 0:
-                        history = history + [[prompt, streamer_text.strip()]]
+                        history = history + [[prompt, streamer_text]]
                     else:
-                        history[-1] = [prompt, streamer_text.strip()]
-                    yield streamer_text.strip(), history
+                        history[-1] = [prompt, streamer_text]
+                    yield streamer_text, history
         else:
             if "chatglm-6b" == self.model_name or "chatglm2-6b" == self.model_name or "chatglm2-6b-32k" == self.model_name:
                 if self.use_deepspeed:
@@ -112,8 +133,12 @@ class AutoLM(LLM):
                     top_p=self.top_p,
                     do_sample=self.do_sample
                 )
-                history = history + [[prompt, response]]
-                yield response, history
+            elif "Qwen-7B-Chat" == self.model_name:
+                if self.use_deepspeed:
+                    chat = self.model.module.chat
+                else:
+                    chat = self.model.chat
+                response, _ = chat(self.tokenizer, prompt, history, append_history=False, generation_config=generation_config)
             else:
                 if self.model_name == "Baichuan-13B-Chat":
                     total_input = []
@@ -132,14 +157,14 @@ class AutoLM(LLM):
                         del inputs["token_type_ids"]
                 if "internlm-chat-7b-8k" ==  self.model_name:
                     eos_token_id = [2, 103028]
-                generation_kwargs = {**inputs, "max_length": self.max_token, "do_sample": self.do_sample, "temperature": self.temperature, "top_p": self.top_p, "pad_token_id": self.tokenizer.pad_token_id, "eos_token_id": eos_token_id}
+                generation_kwargs = {**inputs, "eos_token_id": eos_token_id, "generation_config": generation_config}
                 response = self.model.generate(**generation_kwargs)
                 response = self.tokenizer.decode(
                     response[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True).strip()
                 if "internlm-chat-7b-8k" ==  self.model_name:
                     response = response.replace("<eoa>", "")
-                history = history + [[prompt, response]]
-                yield response, history
+            history = history + [[prompt, response]]
+            yield response, history
 
     def load_model(self, max_length, top_p, temperature,
                    model_name: str = "chatglm-6b",

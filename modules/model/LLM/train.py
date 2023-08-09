@@ -111,7 +111,7 @@ def parse_args():
         "--model_name",
         type=str,
         default=args_to_load["model name"],
-        choices=["chatglm-6b", "moss-moon-003-sft", "phoenix-inst-chat-7b", "Guanaco", "baichuan-vicuna-chinese-7b", "chatglm2-6b", "chatglm2-6b-32k", "Baichuan-13B-Chat", "internlm-chat-7b-8k", "chinese-alpaca-2-7b"], 
+        choices=["chatglm-6b", "moss-moon-003-sft", "phoenix-inst-chat-7b", "Guanaco", "baichuan-vicuna-chinese-7b", "chatglm2-6b", "chatglm2-6b-32k", "Baichuan-13B-Chat", "internlm-chat-7b-8k", "chinese-alpaca-2-7b", "Qwen-7B-Chat"], 
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
