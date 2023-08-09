@@ -44,6 +44,7 @@ def copy_custom_files(source, target):
         shutil.copy(os.path.join(source, "tokenization_chatglm.py"), target)
     elif (
         "phoenix-inst-chat-7b" == model_name or
+        "phoenix-inst-chat-7b-v1.1" == model_name or
         "Guanaco" == model_name or
         "baichuan-vicuna-chinese-7b" == model_name or
         "chinese-alpaca-2-7b" == model_name
@@ -133,7 +134,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             device_map=device_map,
             quantization_config=quantization_config, 
             torch_dtype=torch.float16)
-    elif "phoenix-inst-chat-7b" == model_name:
+    elif "phoenix-inst-chat-7b" == model_name or "phoenix-inst-chat-7b-v1.1" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir='./')
         if max_length > config.seq_length:
             config.update({"seq_length": max_length})
@@ -260,6 +261,7 @@ def get_lora_model(model, path, lora_rank, checkpoint):
     if (
         "chatglm-6b" == model_name or
         "chatglm2-6b-32k" == model_name or
+        "phoenix-inst-chat-7b" == model_name or
         "phoenix-inst-chat-7b-v1.1" == model_name or
         "Guanaco" == model_name or
         "baichuan-vicuna-chinese-7b" == model_name or
@@ -300,7 +302,7 @@ def get_preprocess_datacollator(path):
         return preprocess_4_chatglm, data_collator_4_chatglm
     elif "chatglm2-6b" == model_name or "chatglm2-6b-32k" == model_name:
         return preprocess_4_chatglm2, data_collator_4_chatglm2
-    elif "phoenix-inst-chat-7b" == model_name:
+    elif "phoenix-inst-chat-7b" == model_name or "phoenix-inst-chat-7b-v1.1" == model_name:
         return preprocess_4_phoenix, data_collator_4_phoenix
     elif "moss-moon-003-sft" == model_name:
         return preprocess_4_moss, data_collator_4_moss
@@ -322,7 +324,7 @@ def get_preprocess_datacollator(path):
 def build_query(path, tokenizer, question, history):
     model_name = get_model_name(path)
     query = ""
-    if "phoenix-inst-chat-7b" == model_name:
+    if "phoenix-inst-chat-7b" == model_name or "phoenix-inst-chat-7b-v1.1" == model_name:
         for q, a in history:
             query += "Human: {}{}Assistant: {}{}{}".format(q, tokenizer.eos_token, tokenizer.bos_token, a, tokenizer.eos_token)
         query += "Human: {}{}Assistant:{}".format(question, tokenizer.eos_token, tokenizer.bos_token)
