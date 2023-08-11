@@ -239,8 +239,8 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
         config.fp16 = True
         if use_4bit or use_8bit:
             config.use_flash_attn = False
-        if max_length > config.n_positions:
-            config.update({"n_positions": max_length})
+        if max_length > config.max_position_embeddings:
+            config.update({"max_position_embeddings": max_length})
         tokenizer = AutoTokenizer.from_pretrained(
             path, cache_dir="./", trust_remote_code=True, 
             pad_token="<|endoftext|>", eos_token="<|im_end|>", bos_token="<|im_start|>"
