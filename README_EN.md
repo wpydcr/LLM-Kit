@@ -103,7 +103,8 @@ $ pip install -r requirements.txt
   - [x] [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B)
   - [x] [THUDM/chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
   - [x] [internlm/internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
-  - [ ] [llama2]()
+  - [x] [chinese-alpaca-2-7b](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
+  - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
 - [x]  finetune Support
   - [x] [LoRA](https://github.com/tloen/alpaca-lora)
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>

@@ -61,3 +61,5 @@ scikit-maad
 praat-parselmouth
 dashscope
 bitsandbytes
+einops
+transformers_stream_generator
