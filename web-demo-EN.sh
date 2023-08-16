@@ -1,5 +1,5 @@
 
 
-./Linux-env/bin/python webui.py en_UK
+./Linux-env/bin/python webui.py --language en_UK
 
 

@@ -1,3 +1,3 @@
 @echo off
-.\env\python.exe webui.py cn
+.\env\python.exe webui.py --language cn
 pause

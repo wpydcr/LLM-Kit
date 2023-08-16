@@ -7,7 +7,7 @@ from utils.language_switch_utils import Localizer
 import argparse
 
 parser = argparse.ArgumentParser(description="Language")
-parser.add_argument("language", type=str,default="auto", help="auto/en_UK")
+parser.add_argument("--language", type=str,default="auto", help="auto/en_UK")
 arg = parser.parse_args()
 
 localizer = Localizer(arg.language)

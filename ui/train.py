@@ -51,9 +51,9 @@ def show_emb_params_add_api(api_list,model_list):
     return res[0],res[1],gr.update(value=' | '.join((api_list+model_list)))
 
 def load_emb_val_params(api_list,model_list,*args):
-    from webui import  localizer
+    # from webui import  localizer
     if api_list is None and model_list is None:
-        raise localizer("未选择API或模型")
+        raise gr.Error("未选择API或模型")
     params = {}
     if 'openai' in api_list:
         params['openai'] = {
