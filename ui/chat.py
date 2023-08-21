@@ -112,26 +112,27 @@ def load_params(api_list, model_list, lora_list, *args):
             params['appid'] = args[17]
             params['api_key'] = args[18]
             params['secret_key'] = args[19]
-            params['temperature'] = args[20]
-            params['top_k'] = args[21]
-            params['max_tokens'] = args[22]
+            params['api_version'] = args[20]
+            params['temperature'] = args[21]
+            params['top_k'] = args[22]
+            params['max_tokens'] = args[23]
         elif api_list == 'ali api':
             params['name'] = 'ali api'
-            params['api_key'] = args[23]
-            params['top_p'] = args[24]
-            params['top_k'] = args[25]
-            params['kuake_search'] = args[26]
+            params['api_key'] = args[24]
+            params['top_p'] = args[25]
+            params['top_k'] = args[26]
+            params['kuake_search'] = args[27]
         else:
             pass
         return chat_model.load_api_params(params)
     elif model_list is not None:
         params['name'] = model_list
         params['lora'] = lora_list
-        params['quantization'] = args[27]
-        params['max_length'] = args[28]
-        params['top_p'] = args[29]
-        params['temperature'] = args[30]
-        params['use_deepspeed'] = args[31]
+        params['quantization'] = args[28]
+        params['max_length'] = args[29]
+        params['top_p'] = args[30]
+        params['temperature'] = args[31]
+        params['use_deepspeed'] = args[32]
         return chat_model.load_model(params)
     raise gr.Error('请选择API或模型')
 
@@ -262,9 +263,10 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         params['spark_appid'] = args[16]
         params['spark_api_key'] = args[17]
         params['spark_secret_key'] = args[18]
-        params['spark_temperature'] = args[19]
-        params['spark_top_k'] = args[20]
-        params['spark_max_tokens'] = args[21]
+        params['spark_api_version'] = args[19]
+        params['spark_temperature'] = args[20]
+        params['spark_top_k'] = args[21]
+        params['spark_max_tokens'] = args[22]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -272,10 +274,10 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'ali api' in api_api_list:
         params['api_list'].append('ali api')
-        params['ali_api_key'] = args[22]
-        params['ali_top_p'] = args[23]
-        params['ali_top_k'] = args[24]
-        params['ali_kuake_search'] = args[25]
+        params['ali_api_key'] = args[23]
+        params['ali_top_p'] = args[24]
+        params['ali_top_k'] = args[25]
+        params['ali_kuake_search'] = args[26]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -286,13 +288,13 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         if api_emb_api_list is not None:
             if 'openai' == api_emb_api_list:
                 params['emb_name'] = 'openai'
-                params['emb_api_key'] = args[26]
-                params['emb_port'] = args[27]
+                params['emb_api_key'] = args[27]
+                params['emb_port'] = args[28]
             elif 'azure openai' == api_emb_api_list:
                 params['emb_api'] = 'azure openai'
-                params['emb_api_key'] = args[28]
-                params['emb_endpoint'] = args[29]
-                params['emb_engine'] = args[30]
+                params['emb_api_key'] = args[29]
+                params['emb_endpoint'] = args[30]
+                params['emb_engine'] = args[31]
         elif api_emb_model_list is not None:
             params['emb_name'] = api_emb_model_list
         else:
@@ -384,6 +386,7 @@ def chat_page(localizer):
                                 lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                             spark_secret_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*secret_key:", type='password')
+                            spark_api_version = gr.Radio(["V1.5","V2.0"],label=localizer("API版本"),value="V1.5")
                             spark_temperature = gr.Slider(
                                 0, 1, value=0.5, step=0.05, label="Temperature", interactive=True, elem_id='chat_spark_temperature')
                             spark_top_k = gr.Slider(
@@ -520,6 +523,7 @@ def chat_page(localizer):
                             lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                         api_spark_secret_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*secret_key:", type='password')
+                        api_spark_api_version = gr.Radio(["V1.5","V2.0"],label=localizer("API版本"),value="V1.5")
                         api_spark_temperature = gr.Slider(
                             0, 1, value=0.5, step=0.05, label="Temperature", interactive=True, elem_id='chat_spark_temperature')
                         api_spark_top_k = gr.Slider(
@@ -582,7 +586,6 @@ def chat_page(localizer):
                         lines=1, placeholder="Write Here...", label=localizer("*联网key:"), type='password')
                     api_result_len = gr.Slider(
                         1, 20, value=3, step=1, label=localizer("搜索条数:"), interactive=True)
-
     with gr.Tab(localizer("本地模型数据库并行调用")) as dual_local:
         with gr.Row():
             with gr.Column(scale=3):
@@ -626,7 +629,7 @@ def chat_page(localizer):
                     parallel_local_model_save = gr.Button(localizer("确定"), variant="primary")
                     parallel_local_model_emptymodelBtn = gr.Button(localizer("清空"))
                 with gr.Accordion(localizer(localizer("使用知识库")), open=False):
-                    switch_chatbot = gr.Radio(["chatbot1","chatbot2"], label=localizer("清空"), value=None)
+                    switch_chatbot = gr.Radio(["chatbot1","chatbot2"], label=localizer("选择Chatbot"), value=None)
                     with gr.Tab(localizer("Embedding API")):
                         emb_api_list = gr.Radio(embedding_api, show_label=False, value=None)
                         with gr.Accordion(localizer('openai参数'), open=True, visible=False) as emb_openai_params:
@@ -672,7 +675,7 @@ def chat_page(localizer):
                         outputs=[emb_openai_params, emb_azure_openai_params, emb_api_list, emb_model_list])
 
     total_params = [prompt, openai_api_key, openai_port, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
-                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed]
+                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed]
 
     history = gr.State([])
 
@@ -699,7 +702,7 @@ def chat_page(localizer):
                outputs=[user_input, submitGroup], show_progress=True)
 
     parallel_local_model_total_params = [parallel_local_model_prompt, openai_api_key, openai_port, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
-                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, parallel_local_model_quantization, parallel_local_model_max_length, parallel_local_model_top_p, parallel_local_model_temperature, parallel_local_model_use_deepspeed]
+                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, parallel_local_model_quantization, parallel_local_model_max_length, parallel_local_model_top_p, parallel_local_model_temperature, parallel_local_model_use_deepspeed]
 
 
 
@@ -721,7 +724,7 @@ def chat_page(localizer):
 
     # API并行调用页面
     api_total_params = [api_openai_api_key, api_openai_port, api_azure_api_key, api_azure_endpoint, api_azure_engine, api_ernie_api_key, api_ernie_secret_key, api_ernie_temperature, api_ernie_top_p, api_ernie_penalty_score, api_ernie_turbo_api_key,
-                        api_ernie_turbo_secret_key, api_chatglm_api_key, api_chatglm_temperature, api_chatglm_top_p, api_chatglm_type, api_spark_appid, api_spark_api_key, api_spark_secret_key, api_spark_temperature, api_spark_top_k, api_spark_max_tokens, api_ali_api_key, api_ali_top_p, api_ali_top_k, api_ali_kuake_search]
+                        api_ernie_turbo_secret_key, api_chatglm_api_key, api_chatglm_temperature, api_chatglm_top_p, api_chatglm_type, api_spark_appid, api_spark_api_key, api_spark_secret_key, api_spark_api_version, api_spark_temperature, api_spark_top_k, api_spark_max_tokens, api_ali_api_key, api_ali_top_p, api_ali_top_k, api_ali_kuake_search]
     api_embed_total_params = [api_embedding_openai_api_key, api_embedding_openai_port,
                               api_embedding_azure_api_key, api_embedding_azure_endpoint, api_embedding_azure_engine]
     api_api_list.change(show_api_params_add_api, inputs=[api_api_list], outputs=[api_openai_params, api_azure_openai_params,

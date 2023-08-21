@@ -220,7 +220,7 @@ class spark_api():
     def get_embedding(self):
         pass
 
-    def setv(self,spark_api_key=None,spark_api_secret=None,spark_appid=None,temperature=0.95,top_k=4,max_tokens=2048,gpt_url="ws://spark-api.xf-yun.com/v1.1/chat"):
+    def setv(self,spark_api_key=None,spark_api_secret=None,spark_appid=None,temperature=0.95,top_k=4,max_tokens=2048,spark_api_version="V1.5"):
         if spark_appid == '':
             return {
                 'status': -1,
@@ -242,8 +242,18 @@ class spark_api():
         self.temperature = temperature
         self.top_k = top_k
         self.max_tokens = max_tokens
-        self.gpt_url = gpt_url
-        self.spark_api = Spark_Api(self.spark_appid,self.spark_api_secret,self.spark_api_key,self.temperature,self.top_k,self.max_tokens,self.gpt_url)
+        if spark_api_version == "V1.5":
+            self.domain = "general"
+            self.gpt_url = "ws://spark-api.xf-yun.com/v1.1/chat"
+        elif spark_api_version == "V2.0":
+            self.domain = "generalv2"
+            self.gpt_url = "ws://spark-api.xf-yun.com/v2.1/chat"
+        else:
+            return {
+                "status":-1,
+                "message":"API版本错误"
+            }
+        self.spark_api = Spark_Api(self.spark_appid,self.spark_api_secret,self.spark_api_key,self.temperature,self.top_k,self.max_tokens,self.gpt_url,self.domain)
         self.spark_api.create_ws()
         return {
             'status': 0,

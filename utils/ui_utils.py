@@ -781,7 +781,7 @@ class chat_base_api():
                           top_p=params['top_p'], chatglm_type=params['type'])
         elif self.api_type == 'spark api':
             response = self.llm.setv(spark_api_key=params['api_key'], spark_api_secret=params['secret_key'], spark_appid=params['appid'],
-                          temperature=params['temperature'], top_k=params['top_k'], max_tokens=params['max_tokens'])
+                          temperature=params['temperature'], top_k=params['top_k'], max_tokens=params['max_tokens'],spark_api_version=params['api_version'])
         elif self.api_type == 'ali api':
             response = self.llm.setv(api_key=params['api_key'], top_p=params['top_p'],
                           top_k=params['top_k'], kuake_search=params['kuake_search'])
@@ -940,7 +940,6 @@ class chat_base_model():
             if not answer == '':
                 fact_prompt = f'This following message is relative context searched from internet:\nInformation:{answer}'
                 prompt = prompt+'\n'+fact_prompt
-
         if doc is not None:
             if doc_type == 'faiss':
                 from ui.apply_knowledge import doc_qa

@@ -147,26 +147,27 @@ def load_faiss_params(api_list, model_list, lora_list, *args):
             params['appid'] = args[16]
             params['api_key'] = args[17]
             params['secret_key'] = args[18]
-            params['temperature'] = args[19]
-            params['top_k'] = args[20]
-            params['max_tokens'] = args[21]
+            params['api_version'] = args[19]
+            params['temperature'] = args[20]
+            params['top_k'] = args[21]
+            params['max_tokens'] = args[22]
         elif api_list == 'ali api':
             params['name'] = 'ali api'
-            params['api_key'] = args[22]
-            params['top_p'] = args[23]
-            params['top_k'] = args[24]
-            params['kuake_search'] = args[25]
+            params['api_key'] = args[23]
+            params['top_p'] = args[24]
+            params['top_k'] = args[25]
+            params['kuake_search'] = args[26]
         else:
             pass
         return chat_model.load_api_params(params)
     elif model_list is not None:
         params['name'] = model_list
         params['lora'] = lora_list
-        params['quantization'] = args[26]
-        params['max_length'] = args[27]
-        params['top_p'] = args[28]
-        params['temperature'] = args[29]
-        params['use_deepspeed'] = args[30]
+        params['quantization'] = args[27]
+        params['max_length'] = args[28]
+        params['top_p'] = args[29]
+        params['temperature'] = args[30]
+        params['use_deepspeed'] = args[31]
         return chat_model.load_model(params)
     raise gr.Error('请选择API或模型')
     
@@ -228,25 +229,26 @@ def load_mysql_params(mysql_api_list,mysql_model_list,*args):
             params['appid'] = args[16]
             params['api_key'] = args[17]
             params['secret_key'] = args[18]
-            params['temperature'] = args[19]
-            params['top_k'] = args[20]
-            params['max_tokens'] = args[21]
+            params['api_version'] = args[19]
+            params['temperature'] = args[20]
+            params['top_k'] = args[21]
+            params['max_tokens'] = args[22]
         elif mysql_api_list == 'ali api':
             params['name'] = 'ali api'
-            params['api_key'] = args[22]
-            params['top_p'] = args[23]
-            params['top_k'] = args[24]
-            params['kuake_search'] = args[25]
+            params['api_key'] = args[23]
+            params['top_p'] = args[24]
+            params['top_k'] = args[25]
+            params['kuake_search'] = args[26]
         else:
             pass
         return chat_model.load_api_params(params)
     elif mysql_model_list is not None:
         params['name'] = mysql_model_list
-        params['quantization'] = args[26]
-        params['max_length'] = args[27]
-        params['top_p'] = args[28]
-        params['temperature'] = args[29]
-        params['use_deepspeed'] = args[30]
+        params['quantization'] = args[27]
+        params['max_length'] = args[28]
+        params['top_p'] = args[29]
+        params['temperature'] = args[30]
+        params['use_deepspeed'] = args[31]
         return chat_model.load_model(params)
     raise gr.Error('请选择API或模型')
 
@@ -277,7 +279,7 @@ def show_table_data(host,user,password,port,database,table):
 def vec_search(faiss_user_input, faiss_chatbot, history,faiss_net,faiss_search,faiss_search_key,faiss_result_len,doc1):
     if doc1 is None:
         raise gr.Error('请先选择向量知识库')
-    for chatbot, history, user_input in chat_model.predict(faiss_user_input, faiss_chatbot, history,faiss_net,faiss_search,faiss_search_key,faiss_result_len,doc=doc1):
+    for chatbot, history, user_input in chat_model.predict(faiss_user_input, faiss_chatbot, history,faiss_net,faiss_search,faiss_search_key,faiss_result_len,doc=doc1,doc_type='faiss'):
         yield chatbot, history, user_input
 
 def apply_knowledge(localizer):
@@ -339,6 +341,7 @@ def apply_knowledge(localizer):
                                 lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                             faiss_spark_secret_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*secret_key:", type='password')
+                            faiss_spark_api_version = gr.Radio(["V1.5","V2.0"],label=localizer("API版本"),value="V1.5")
                             faiss_spark_temperature = gr.Slider(
                                 0, 1, value=0.5, step=0.05, label="Temperature", interactive=True)
                             faiss_spark_top_k = gr.Slider(
@@ -456,6 +459,7 @@ def apply_knowledge(localizer):
                                 lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                             mysql_spark_secret_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*secret_key:", type='password')
+                            mysql_spark_api_version = gr.Radio(["V1.5","V2.0"],label=localizer("API版本"),value="V1.5")
                             mysql_spark_temperature = gr.Slider(
                                 0, 1, value=0.5, step=0.05, label="Temperature", interactive=True)
                             mysql_spark_top_k = gr.Slider(
@@ -500,7 +504,7 @@ def apply_knowledge(localizer):
 
 
     # FAISS
-    fasiss_total_params = [faiss_openai_api_key, faiss_openai_port, faiss_azure_api_key, faiss_azure_endpoint, faiss_azure_engine, faiss_ernie_api_key, faiss_ernie_secret_key, faiss_ernie_temperature, faiss_ernie_top_p, faiss_ernie_penalty_score, faiss_ernie_turbo_api_key, faiss_ernie_turbo_secret_key, faiss_chatglm_api_key, faiss_chatglm_temperature, faiss_chatglm_top_p, faiss_chatglm_type, faiss_spark_appid, faiss_spark_api_key, faiss_spark_secret_key, faiss_spark_temperature, faiss_spark_top_k, faiss_spark_max_tokens,faiss_ali_api_key,faiss_ali_top_p,faiss_ali_top_k,faiss_ali_kuake_search,faiss_quantization,faiss_max_length,faiss_top_p,faiss_temperature,faiss_use_deepspeed]
+    fasiss_total_params = [faiss_openai_api_key, faiss_openai_port, faiss_azure_api_key, faiss_azure_endpoint, faiss_azure_engine, faiss_ernie_api_key, faiss_ernie_secret_key, faiss_ernie_temperature, faiss_ernie_top_p, faiss_ernie_penalty_score, faiss_ernie_turbo_api_key, faiss_ernie_turbo_secret_key, faiss_chatglm_api_key, faiss_chatglm_temperature, faiss_chatglm_top_p, faiss_chatglm_type, faiss_spark_appid, faiss_spark_api_key, faiss_spark_secret_key, faiss_spark_api_version, faiss_spark_temperature, faiss_spark_top_k, faiss_spark_max_tokens,faiss_ali_api_key,faiss_ali_top_p,faiss_ali_top_k,faiss_ali_kuake_search,faiss_quantization,faiss_max_length,faiss_top_p,faiss_temperature,faiss_use_deepspeed]
     embedding_total_params = [embedding_openai_api_key, embedding_openai_port, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
     faiss_Refresh.click(refresh_directories_faiss, outputs=[faiss_model_list,faiss_lora_list,doc1,emb_model_list])
     faiss_save.click(load_faiss_params, [faiss_api_list,faiss_model_list,faiss_lora_list]+fasiss_total_params, [faiss_user_input,faiss_submitGroup],show_progress=True)
@@ -519,7 +523,7 @@ def apply_knowledge(localizer):
     emb_api_list.change(emb_api_select, inputs=[emb_api_list,emb_model_list], outputs=[emb_openai_params,emb_azure_openai_params,emb_api_list,emb_model_list])
 
     # # MySQL
-    mysql_total_params = [mysql_openai_api_key, mysql_openai_port, mysql_azure_api_key, mysql_azure_endpoint, mysql_azure_engine, mysql_ernie_api_key, mysql_ernie_secret_key, mysql_ernie_temperature, mysql_ernie_top_p, mysql_ernie_penalty_score, mysql_ernie_turbo_api_key, mysql_ernie_turbo_secret_key, mysql_chatglm_api_key, mysql_chatglm_temperature, mysql_chatglm_top_p, mysql_chatglm_type, mysql_spark_appid, mysql_spark_api_key, mysql_spark_secret_key, mysql_spark_temperature, mysql_spark_top_k, mysql_spark_max_tokens,mysql_ali_api_key,mysql_ali_top_p,mysql_ali_top_k,mysql_ali_kuake_search,mysql_quantization,mysql_max_length,mysql_top_p,mysql_temperature,mysql_use_deepspeed]
+    mysql_total_params = [mysql_openai_api_key, mysql_openai_port, mysql_azure_api_key, mysql_azure_endpoint, mysql_azure_engine, mysql_ernie_api_key, mysql_ernie_secret_key, mysql_ernie_temperature, mysql_ernie_top_p, mysql_ernie_penalty_score, mysql_ernie_turbo_api_key, mysql_ernie_turbo_secret_key, mysql_chatglm_api_key, mysql_chatglm_temperature, mysql_chatglm_top_p, mysql_chatglm_type, mysql_spark_appid, mysql_spark_api_key, mysql_spark_secret_key, mysql_spark_api_version, mysql_spark_temperature, mysql_spark_top_k, mysql_spark_max_tokens,mysql_ali_api_key,mysql_ali_top_p,mysql_ali_top_k,mysql_ali_kuake_search,mysql_quantization,mysql_max_length,mysql_top_p,mysql_temperature,mysql_use_deepspeed]
     connect.click(get_databases, inputs=[host,user,password,port],outputs=[doc0])
     mysql_Refresh.click(refresh_directories_mysql, outputs=[mysql_model_list])
     mysql_save.click(load_mysql_params, [mysql_api_list,mysql_model_list]+mysql_total_params, [mysql_user_input,mysql_submitGroup],show_progress=True)
