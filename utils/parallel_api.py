@@ -115,6 +115,7 @@ class Parallel_api(object):
                 'appid': params['spark_appid'],
                 'api_key': params['spark_api_key'],
                 'secret_key': params['spark_secret_key'],
+                "api_version":params['spark_api_version'],
                 'temperature': params['spark_temperature'],
                 'top_k': params['spark_top_k'],
                 'max_tokens': params['spark_max_tokens']

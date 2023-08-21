@@ -67,7 +67,8 @@ class Spark_Api(object):
                  temperature=0.5,
                  top_k=4,
                  max_tokens=2048,
-                 gpt_url="ws://spark-api.xf-yun.com/v1.1/chat"):
+                 gpt_url="ws://spark-api.xf-yun.com/v1.1/chat",
+                 domain="general"):
         self.appid = appid
         self.api_secret = api_secret
         self.api_key = api_key
@@ -75,6 +76,7 @@ class Spark_Api(object):
         self.top_k = top_k
         self.max_tokens = max_tokens
         self.gpt_url = gpt_url
+        self.domain = domain
         self.queue = Queue()
 
     def create_ws(self):
@@ -157,7 +159,7 @@ class Spark_Api(object):
             },
             "parameter": {
                 "chat": {
-                    "domain": "general",
+                    "domain": self.domain,
                     "auditing": "default",
                     "temperature": self.temperature,
                     "max_tokens": self.max_tokens,

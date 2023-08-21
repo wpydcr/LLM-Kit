@@ -157,5 +157,6 @@
   "使用deepspeed(仅支持Linux)": "Use deepspeed(only for Linux)",
   "背景图": "Background Picture",
   "请上传要使用的背景图片": "Please Upload Background picture",
-  "流式输出": "Streaming"
+  "流式输出": "Streaming",
+  "选择Chatbot": "Choose Chatbot"
 }
