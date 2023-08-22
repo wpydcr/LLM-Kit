@@ -207,6 +207,10 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             torch_dtype=torch.float16,
             )
         model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
+        tokenizer.user_token_id = model.generation_config.user_token_id
+        tokenizer.user_token = tokenizer.convert_ids_to_tokens(tokenizer.user_token_id)
+        tokenizer.assistant_token_id = model.generation_config.assistant_token_id
+        tokenizer.assistant_token = tokenizer.convert_ids_to_tokens(tokenizer.assistant_token_id)
     elif "internlm-chat-7b-8k" == model_name:
         config = AutoConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
         if max_length > config.max_position_embeddings:
@@ -238,7 +242,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
         config = AutoConfig.from_pretrained(path, cache_dir="./", trust_remote_code=True)
         config.fp16 = True
         if use_4bit or use_8bit:
-            config.use_flash_attn = False
+            config.update({"use_flash_attn": False})
         if max_length > config.max_position_embeddings:
             config.update({"max_position_embeddings": max_length})
         tokenizer = AutoTokenizer.from_pretrained(
@@ -352,6 +356,20 @@ def build_query(path, tokenizer, question, history):
             query += "{}[INST] {} [/INST] {}{}".format(start_token, q, a, tokenizer.eos_token)
         start_token = "" if query == "" else tokenizer.bos_token
         query += "{}[INST] {} [/INST]".format(start_token, question)
+    elif "chatglm2-6b-32k" == model_name:
+        round = 1
+        for q, a in history:
+            query += "[Round {}]\n\n问：{}\n\n答：{}{}".format(round, q, a, tokenizer.eos_token)
+            round += 1
+        query += "[Round {}]\n\n问：{}\n\n答：".format(round, question)
+    elif "Qwen-7B-Chat" == model_name:
+        for q, a in history:
+            query += "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n{}<|im_end|>\n".format(q, a)
+        query += "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n".format(question)
+    elif "Baichuan-13B-Chat" == model_name:
+        for q, a in history:
+            query += tokenizer.user_token + q + tokenizer.assistant_token + a + tokenizer.eos_token
+        query += tokenizer.user_token + question + tokenizer.assistant_token + tokenizer.eos_token
     else:
         raise NotImplementedError("Model is not implemented.")
     return query
@@ -523,7 +541,7 @@ def preprocess_4_baichuan_13b_chat(example, tokenizer, max_length):
     answer = example["answer"]
     question_tokens = tokenizer.encode(question)
     answer_tokens = tokenizer.encode(answer)
-    full_tokens = [195] + question_tokens + [196] + answer_tokens + [tokenizer.eos_token_id]
+    full_tokens = [tokenizer.user_token_id] + question_tokens + [tokenizer.assistant_token_id] + answer_tokens + [tokenizer.eos_token_id]
     user_prompt_len = len(question_tokens) + 2
     labels = [-100] * user_prompt_len + full_tokens[user_prompt_len:]
     full_tokens = full_tokens[:max_length]
