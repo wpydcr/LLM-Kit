@@ -1739,7 +1739,7 @@ class embedding_train_utils():
                 yield outs+'Done!' if outs != '' else ''
                 break
             training_details = self.train_thread.queue.get()
-            print(training_details)
+            # print(training_details)
             if training_details is None:
                 yield outs+'Done!' if outs != '' else ''
                 break
