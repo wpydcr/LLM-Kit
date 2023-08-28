@@ -1,0 +1,17 @@
+{
+    "bert-base-uncased": {
+        "module": "TEXT2VEC",
+        "model_arch": "BERT",
+        "encoder_type": null
+    },
+    "paraphrase-multilingual-MiniLM-L12-v2": {
+        "module": "TEXT2VEC",
+        "model_arch": "SENTENCEBERT",
+        "encoder_type": "MEAN"
+    },
+    "GanymedeNil_text2vec-large-chinese":{
+        "module": "TEXT2VEC",
+        "model_arch": "COSENT",
+        "encoder_type": "FIRST_LAST_AVG"
+    }
+}
