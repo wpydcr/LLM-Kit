@@ -234,8 +234,8 @@ class Avtar():
             with gr.Column(scale=1):
                 with gr.Accordion(label=localizer("语音合成"), open=False):
                     with gr.Accordion(label=localizer("文字转语音"), open=True):
-                        # gen_type = gr.Radio(['本地','在线']+vits_models, label=localizer("合成方式"),value='本地')
-                        gen_type = gr.Radio(['本地']+vits_models, label=localizer("合成方式"),value='本地')
+                        gen_type = gr.Radio(['本地','在线']+vits_models, label=localizer("合成方式"),value='本地')
+                        # gen_type = gr.Radio(['本地']+vits_models, label=localizer("合成方式"),value='本地')
                         lang = gr.Radio(['中文'],label=localizer("语言"),value='中文')
                     with gr.Accordion(label=localizer("修改声线"), open=True):
                         voice_style = gr.Radio(["默认"]+svcs, label=localizer("声线"),value="默认")

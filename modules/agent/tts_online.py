@@ -11,7 +11,7 @@ lang_dict = {
     '日语':'jp'
 }
 
-def tts(text, spd, lang):
+def tts(text, spd, lang, filename):
     # url = f"https://fanyi.baidu.com/gettts?lan={lang_dict[lang]}&text={text}&spd={spd}&source=web"
 
     # payload = {}
@@ -33,7 +33,6 @@ def tts(text, spd, lang):
     url = f"https://yntts.qq.com/generateTTSURL"
     
     payload = {'txt': text, 'volume': 50, 'speed': 50, 'speaker': "25", 'pitch': 50, 'type': 1, 'tone': 42}
-    headers = {}
 
     res = requests.get(url, json=payload)
     cs=0
@@ -45,10 +44,8 @@ def tts(text, spd, lang):
     if res.status_code != 200:
         return None
 
-    file_path = os.path.join(real_path, "..", "data", "tts", "tts.mp3")
-
     try:
-        os.remove(file_path)
+        os.remove(filename+'.mp3')
     except FileNotFoundError as e:
         pass
     except Exception as e:
@@ -57,21 +54,21 @@ def tts(text, spd, lang):
     session_id = res.json().get('session_id')
     url2 = f"https://yntts.qq.com/tts.mp3?session_id={session_id}&speaker=42&language=91&sampling_rate=816"
     res2 = requests.get(url2, stream=True)
-    with open(file_path, 'wb') as fd:
+    with open(filename+'.mp3', 'wb') as fd:
         for chunk in res2.iter_content():
             fd.write(chunk)
     
-    return file_path
+    # return filename+'.mp3'
 
 
 def get_voice(text, spd, filename, gen_type, lang):
     if gen_type == '在线':
-        voice = tts(text, spd, lang)
-        if voice is None:
-            print("TTS failed")
-            return None
-        with open(filename+ ".mp3", "wb") as f:
-            f.write(voice)
+        tts(text, spd, lang, filename)
+        # if voice is None:
+        #     print("TTS failed")
+        #     return None
+        # with open(filename+ ".mp3", "wb") as f:
+        #     f.write(voice)
         # audio = AudioSegment.from_mp3(filename+'.mp3')
         # audio.export(filename+'.wav', format="wav")
         # os.remove(filename+'.mp3')
