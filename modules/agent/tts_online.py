@@ -12,23 +12,56 @@ lang_dict = {
 }
 
 def tts(text, spd, lang):
-    url = f"https://fanyi.baidu.com/gettts?lan={lang_dict[lang]}&text={text}&spd={spd}&source=web"
+    # url = f"https://fanyi.baidu.com/gettts?lan={lang_dict[lang]}&text={text}&spd={spd}&source=web"
 
-    payload = {}
-    headers = {
-        'Cookie': 'BAIDUID=543CBD0E4FB46C2FD5F44F7D81911F15:FG=1'
-    }
+    # payload = {}
+    # headers = {
+    #     'Cookie': 'BAIDUID=543CBD0E4FB46C2FD5F44F7D81911F15:FG=1'
+    # }
 
-    res = requests.request("GET", url, headers=headers, data=payload)
+    # res = requests.request("GET", url, headers=headers, data=payload)
+    # cs=0
+    # while res.content == b'' and cs<11:
+    #     cs+=1
+    #     res = requests.request("GET", url, headers=headers, data=payload)
+    #     time.sleep(0.1)
+    # if res.status_code == 200:
+    #     return res.content
+    # else:
+    #     return None
+
+    url = f"https://yntts.qq.com/generateTTSURL"
+    
+    payload = {'txt': text, 'volume': 50, 'speed': 50, 'speaker': "25", 'pitch': 50, 'type': 1, 'tone': 42}
+    headers = {}
+
+    res = requests.get(url, json=payload)
     cs=0
-    while res.content == b'' and cs<11:
+    while res.status_code != 200 and cs<11:
         cs+=1
-        res = requests.request("GET", url, headers=headers, data=payload)
+        res = requests.get(url, json=payload)
         time.sleep(0.1)
-    if res.status_code == 200:
-        return res.content
-    else:
+
+    if res.status_code != 200:
         return None
+
+    file_path = os.path.join(real_path, "..", "data", "tts", "tts.mp3")
+
+    try:
+        os.remove(file_path)
+    except FileNotFoundError as e:
+        pass
+    except Exception as e:
+        return None
+
+    session_id = res.json().get('session_id')
+    url2 = f"https://yntts.qq.com/tts.mp3?session_id={session_id}&speaker=42&language=91&sampling_rate=816"
+    res2 = requests.get(url2, stream=True)
+    with open(file_path, 'wb') as fd:
+        for chunk in res2.iter_content():
+            fd.write(chunk)
+    
+    return file_path
 
 
 def get_voice(text, spd, filename, gen_type, lang):
