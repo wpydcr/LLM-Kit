@@ -272,7 +272,7 @@ class spark_api():
                     text = response['message']
                     total_text += text
                 elif response['status'] == -1:
-                    print(response['message'])
+                    # print(response['message'])
                     return {
                         'status': -1,
                         'message': response['message']
@@ -301,7 +301,7 @@ class spark_api():
                         'message': text
                     }
                 elif response['status'] == -1:
-                    print(response['message'])
+                    # print(response['message'])
                     yield {
                         'status': -1,
                         'message': response['message']
@@ -343,7 +343,7 @@ class spark_api():
                             'message': text
                         }
                     elif response['status'] == -1:
-                        print(response['message'])
+                        # print(response['message'])
                         yield {
                             'status': -1,
                             'message': response['message']
@@ -364,7 +364,7 @@ class spark_api():
                         text = response['message']
                         total_text += text
                     elif response['status'] == -1:
-                        print(response['message'])
+                        # print(response['message'])
                         yield {
                             'status': -1,
                             'message': response['message']
@@ -732,7 +732,7 @@ class ernie_api():
                         'message': reply
                     }
                 elif response['status'] == -1:
-                    print(response['message'])
+                    # print(response['message'])
                     yield {
                         'status': -1,
                         'message': response['message']
@@ -851,7 +851,7 @@ class openai_api():
             return '字数超限'
         try:
             response = self.llm_nonstream(messages)
-            print(response.content)
+            # print(response.content)
             return {
                 'status': 0,
                 'message': response.content
@@ -871,7 +871,7 @@ class openai_api():
             return '字数超限'
         try:
             for response in self.llm(messages):
-                print(response[1])
+                # print(response[1])
                 yield {
                     'status': 0,
                     'message': response[1]

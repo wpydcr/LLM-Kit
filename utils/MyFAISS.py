@@ -81,7 +81,7 @@ class MyFAISS(FAISS, VectorStore):
                             id_set.add(l)
                 if break_flag:
                     break
-        if (not self.chunk_conent) or ("add_context" in doc.metadata and not doc.metadata["add_context"]):
+        if (not self.chunk_conent) or (len(docs)>0 and("add_context" in doc.metadata and not doc.metadata["add_context"])):
             return docs
         if len(id_set) == 0 and self.score_threshold > 0:
             return []
