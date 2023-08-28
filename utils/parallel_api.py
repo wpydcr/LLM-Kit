@@ -27,6 +27,7 @@ class api_thread(Thread):
     def run(self):
         while True:
             input = self.inputs.get()
+            print(input)
             if input is None:
                 break
             try:
@@ -34,7 +35,6 @@ class api_thread(Thread):
                     self.outputs.put(chatbot)
                 self.outputs.put(None)
             except Exception as e:
-                print(e)
                 self.chatbot.append([input,'api thread error'])
                 self.outputs.put(self.chatbot)
                 break

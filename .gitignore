@@ -24,6 +24,8 @@
 !/data/apply/audio/.gitkeep
 /data/apply/apply/*
 !/data/apply/apply/.gitkeep
+/data/apply/text2image/*
+!/data/apply/text2image/.gitkeep
 
 /models/Embedding/*
 !/models/Embedding/.gitkeep
