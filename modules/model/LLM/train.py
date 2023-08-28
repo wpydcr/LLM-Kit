@@ -111,7 +111,7 @@ def parse_args():
         "--model_name",
         type=str,
         default=args_to_load["model name"],
-        choices=["chatglm-6b", "moss-moon-003-sft", "phoenix-inst-chat-7b", "phoenix-inst-chat-7b-v1.1", "Guanaco", "baichuan-vicuna-chinese-7b", "chatglm2-6b", "chatglm2-6b-32k", "Baichuan-13B-Chat", "internlm-chat-7b-8k", "chinese-alpaca-2-7b", "Qwen-7B-Chat"], 
+        choices=["chatglm-6b", "moss-moon-003-sft", "phoenix-inst-chat-7b", "Guanaco", "baichuan-vicuna-chinese-7b", "chatglm2-6b", "Baichuan-13B-Chat", "internlm-chat-7b-8k"], 
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
@@ -482,6 +482,12 @@ def save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, pe
         real_path = os.path.split(os.path.realpath(__file__))[0]
         name = os.path.split(args.output_dir)[-1]
         output_path = os.path.join(real_path, "..", "..", "..", "output", "LLM",name)
+
+        if eval_dataloader is not None:
+            perplexity, eval_loss = evaluate(
+                args, model, eval_dataloader, accelerator)
+            logger.info(
+                "epoch {}: perplexity: {} eval_loss: {}".format(epoch, perplexity, eval_loss))
         accelerator.wait_for_everyone()
         unwrapped_model = accelerator.unwrap_model(model)
 
@@ -499,11 +505,6 @@ def save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, pe
         accelerator.wait_for_everyone()
 
     else:
-        if eval_dataloader is not None:
-            perplexity, eval_loss = evaluate(
-                args, model, eval_dataloader, accelerator)
-            logger.info(
-                "epoch {}: perplexity: {} eval_loss: {}".format(epoch, perplexity, eval_loss))
 
         # New Code #
         # Tracks the best checkpoint and best metric
@@ -527,7 +528,7 @@ def save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, pe
                     tokenizer.save_pretrained(args.output_dir)
                     copy_custom_files(args.model_path, args.output_dir)
             accelerator.wait_for_everyone()
-        return best_metric, perplexity
+    return best_metric, perplexity
 
 
 if __name__ == "__main__":
