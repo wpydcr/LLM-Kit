@@ -1,7 +1,7 @@
 import sys
 import os
-sys.path.append(os.path.realpath(__file__).split('LLM-Kit')[0]+'LLM-Kit')
-# print(sys.path)
+real_path = os.path.abspath(__file__)
+sys.path.append(os.path.join(os.path.dirname(real_path), '..', '..', '..'))
 import numpy as np
 import argparse
 import logging
@@ -530,6 +530,5 @@ def save_model(args, model, eval_dataloader, accelerator, epoch, best_metric, pe
             accelerator.wait_for_everyone()
     return best_metric, perplexity
 
-
-if __name__ == "__main__":
+if __name__=='__main__':
     main()
