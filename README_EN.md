@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # install requirements
 $ pip install -r requirements.txt
 ```
- Or simply download：[Windows Env](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux Env](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
+ Or simply download：[Windows Env](https://pan.baidu.com/s/1i7t2nAnalrELgy9bUbyu2w?pwd=p5mb)， [Linux Env](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
  
  [GPU Driver](https://www.nvidia.cn/Download/index.aspx?lang=cn) and [cuda](https://developer.nvidia.com/cuda-toolkit-archive) is also required and should be pre-installed.
 
@@ -105,6 +105,8 @@ $ pip install -r requirements.txt
   - [x] [internlm/internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+- [ ] multimodal large model(inference)
+  -[ ] qwen-vl
 - [x]  finetune Support
   - [x] [LoRA](https://github.com/tloen/alpaca-lora)
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
@@ -119,7 +121,7 @@ $ pip install -r requirements.txt
     - [X] LLM API Parallel call
     - [X] LLM API Streaming model
   - [ ] Image Generation
-    - [x] Midjourney
+    - [x] [Midjourney(VPN)](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2
   - [ ] Dataset
     - [x] LLM Training dataset make

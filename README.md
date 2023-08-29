@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # 安装依赖
 $ pip install -r requirements.txt
 ```
- 依赖也可以直接下载：[Windows环境包](https://pan.baidu.com/s/1dKMU4KN7qpB9kQ-Kxs57GA?pwd=yxr2)， [Linux环境包](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
+ 依赖也可以直接下载：[Windows环境包](https://pan.baidu.com/s/1i7t2nAnalrELgy9bUbyu2w?pwd=p5mb)， [Linux环境包](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
  
  [显卡驱动](https://www.nvidia.cn/Download/index.aspx?lang=cn)和[cuda](https://developer.nvidia.com/cuda-toolkit-archive)自行安装
 
@@ -105,6 +105,8 @@ $ pip install -r requirements.txt
   - [x] [internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+- [ ] 多模态大模型(推理)
+  -[ ] qwen-vl
 - [x]  Finetune 支持
   - [x] [LoRA](https://github.com/tloen/alpaca-lora)
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
@@ -119,7 +121,7 @@ $ pip install -r requirements.txt
     - [X] LLM API 并行调用
     - [X] LLM API 流式调用
   - [ ] 图像生成
-    - [x] Midjourney
+    - [x] [Midjourney(VPN)](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2
   - [ ] 数据集
     - [x] LLM训练数据集制作
