@@ -106,7 +106,7 @@ $ pip install -r requirements.txt
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
 - [ ] 多模态大模型(推理)
-  -[ ] qwen-vl
+  - [ ] qwen-vl
 - [x]  Finetune 支持
   - [x] [LoRA](https://github.com/tloen/alpaca-lora)
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
