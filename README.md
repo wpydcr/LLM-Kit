@@ -103,7 +103,8 @@ $ pip install -r requirements.txt
   - [x] [baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B)
   - [x] [chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
   - [x] [internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
-  - [ ] [llama2]()
+  - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
+  - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
 - [x]  Finetune 支持
   - [x] [LoRA](https://github.com/tloen/alpaca-lora)
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
@@ -114,6 +115,12 @@ $ pip install -r requirements.txt
     - [x] [bert-base-uncased](https://huggingface.co/bert-base-uncased)
     - [x] [paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
 - [ ] 工具
+  - [ ] 聊天
+    - [X] LLM API 并行调用
+    - [X] LLM API 流式调用
+  - [ ] 图像生成
+    - [x] Midjourney
+    - [ ] GEN-2
   - [ ] 数据集
     - [x] LLM训练数据集制作
     - [x] Embedding训练数据集制作
@@ -141,7 +148,7 @@ $ pip install -r requirements.txt
         - [ ] 可视化
     - [ ] 人物形象
         - [ ] 声音
-            - [x] [在线tts](https://fanyi.baidu.com/)
+            - [x] [在线tts](https://yntts.qq.com/)
             - [X] [本地tts](https://github.com/jackiexiao/zhtts)
             - [X] [vits 调用](https://huggingface.co/spaces/zomehwh/vits-models/tree/main/pretrained_models)
             - [ ] [vits 训练](https://github.com/SayaSS/vits-finetuning)
@@ -155,8 +162,6 @@ $ pip install -r requirements.txt
         - [ ] 场景
           - [X] live2d 场景自定义 
 - [ ] 增加 API 支持
-  - [X] LLM API 并行调用
-  - [X] LLM API 流式调用
   - [ ] 利用 fastapi 实现 API 部署方式
   - [ ] 实现调用 API 的 Web UI Demo
   - [ ] VUE 页面前端
