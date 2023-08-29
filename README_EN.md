@@ -148,7 +148,7 @@ $ pip install -r requirements.txt
         - [ ] Visualization
     - [ ] Character
         - [ ] Voice
-            - [x] [Online tts](https://fanyi.baidu.com/)
+            - [x] [Online tts](https://yntts.qq.com/)
             - [X] [Local tts](https://github.com/jackiexiao/zhtts)
             - [X] [vits Call](https://huggingface.co/spaces/zomehwh/vits-models/tree/main/pretrained_models)
             - [ ] [vits Train](https://github.com/SayaSS/vits-finetuning)

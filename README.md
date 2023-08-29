@@ -148,7 +148,7 @@ $ pip install -r requirements.txt
         - [ ] 可视化
     - [ ] 人物形象
         - [ ] 声音
-            - [x] [在线tts](https://fanyi.baidu.com/)
+            - [x] [在线tts](https://yntts.qq.com/)
             - [X] [本地tts](https://github.com/jackiexiao/zhtts)
             - [X] [vits 调用](https://huggingface.co/spaces/zomehwh/vits-models/tree/main/pretrained_models)
             - [ ] [vits 训练](https://github.com/SayaSS/vits-finetuning)
