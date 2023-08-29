@@ -103,7 +103,8 @@ $ pip install -r requirements.txt
   - [x] [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B)
   - [x] [THUDM/chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
   - [x] [internlm/internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
-  - [ ] [llama2]()
+  - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
+  - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
 - [x]  finetune Support
   - [x] [LoRA](https://github.com/tloen/alpaca-lora)
   - [x] <del>[P-Tuning](https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning)<del>
@@ -114,6 +115,12 @@ $ pip install -r requirements.txt
     - [x] [bert-base-uncased](https://huggingface.co/bert-base-uncased)
     - [x] [paraphrase-multilingual-MiniLM-L12-v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
 - [ ] Tools
+  - [ ] Chat
+    - [X] LLM API Parallel call
+    - [X] LLM API Streaming model
+  - [ ] Image Generation
+    - [x] Midjourney
+    - [ ] GEN-2
   - [ ] Dataset
     - [x] LLM Training dataset make
     - [x] Embedding Training dataset make
@@ -155,8 +162,6 @@ $ pip install -r requirements.txt
         - [ ] Field
           - [X] Customized background
 - [ ] Add API Support
-  - [X] LLM API Parallel call
-  - [X] LLM API Streaming model
   - [ ] Deploy API by fastapi
   - [ ] Implement WEB UI Demo by API call
   - [ ] VUE Webui
