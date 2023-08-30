@@ -89,21 +89,24 @@ $ pip install -r requirements.txt
 ## Todo
 
 - [x] LLM API support(no GPU)
-  - [x] [openai(VPN)](https://platform.openai.com/account/api-keys)
+  - [x] [openai](https://platform.openai.com/account/api-keys)
   - [x] [azure openai](https://learn.microsoft.com/zh-cn/azure/cognitive-services/openai/)
   - [x] [文心一言](https://cloud.baidu.com/survey_summit/qianfan.html)
   - [x] [智谱GLM](https://open.bigmodel.cn/usercenter/apikeys)
   - [x] [通义千问](https://help.aliyun.com/document_detail/2399480.html?spm=5176.28197632.0.0.5cea7e06Uj4ELL)
   - [x] [讯飞星火](https://console.xfyun.cn/services/cbm)
 - [ ] LLM support (train/inference)
-  - [x] [THUDM/chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
-  - [x] [fnlp/moss-moon-003-sft](https://huggingface.co/fnlp/moss-moon-003-sft)
-  - [x] [FreedomIntelligence/phoenix-chat-7b](https://huggingface.co/FreedomIntelligence/phoenix-chat-7b)
-  - [x] [JosephusCheung/Guanaco](https://huggingface.co/JosephusCheung/Guanaco)
-  - [x] [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B)
+  - [x] [4bit and 8bit（bitsandbytes only supports linux）](https://github.com/TimDettmers/bitsandbytes)
+  - [x] [deepspeed（On Windows currently only inference mode is supported.）](https://github.com/microsoft/DeepSpeed)
+  - [x] [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+  - [x] [chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
+  - [x] [chatglm2-6b-32k](https://huggingface.co/THUDM/chatglm2-6b-32k)
+  - [x] [moss-moon-003-sft](https://huggingface.co/fnlp/moss-moon-003-sft)
+  - [x] [phoenix-chat-7b](https://huggingface.co/FreedomIntelligence/phoenix-chat-7b)
+  - [x] [Guanaco](https://huggingface.co/JosephusCheung/Guanaco)
+  - [x] [baichuan-vicuna-chinese-7b](https://huggingface.co/fireballoon/baichuan-vicuna-chinese-7b)
   - [x] [Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)
-  - [x] [THUDM/chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
-  - [x] [internlm/internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
+  - [x] [internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
 - [ ] multimodal large model(inference)
@@ -122,7 +125,7 @@ $ pip install -r requirements.txt
     - [X] LLM API Parallel call
     - [X] LLM API Streaming model
   - [ ] Image Generation
-    - [x] [Midjourney(VPN)](https://github.com/CelestialRipple/Midjourney-Web-API)
+    - [x] [Midjourney](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2
   - [ ] Dataset
     - [x] LLM Training dataset make

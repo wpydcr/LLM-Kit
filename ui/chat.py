@@ -346,7 +346,7 @@ def chat_page(localizer):
                             openai_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                             openai_port = gr.Textbox(
-                                lines=1, value='', label="*VPN proxyPort:")
+                                lines=1, value='', label="VPN proxyPort:")
                         with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as azure_openai_params:
                             azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -483,7 +483,7 @@ def chat_page(localizer):
                         api_openai_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                         api_openai_port = gr.Textbox(
-                            lines=1, value='', label="*VPN proxyPort:")
+                            lines=1, value='', label="VPN proxyPort:")
                     with gr.Accordion(localizer("azure openai参数"), open=False, visible=False) as api_azure_openai_params:
                         api_azure_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -554,7 +554,7 @@ def chat_page(localizer):
                             api_embedding_openai_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                             api_embedding_openai_port = gr.Textbox(
-                                lines=1, value='', label="*VPN proxyPort:")
+                                lines=1, value='', label="VPN proxyPort:")
                         with gr.Accordion(localizer('azure openai参数'), open=True, visible=False) as api_emb_azure_openai_params:
                             api_embedding_azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -636,7 +636,7 @@ def chat_page(localizer):
                             embedding_openai_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                             embedding_openai_port = gr.Textbox(
-                                lines=1, value='', label="*VPN proxyPort:")
+                                lines=1, value='', label="VPN proxyPort:")
                         with gr.Accordion(localizer('azure openai参数'), open=True, visible=False) as emb_azure_openai_params:
                             embedding_azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')

@@ -774,13 +774,14 @@ class openai_api():
             }
         if type=='openai':
             openai.api_type = "open_ai"
-            if port == '':
-                return {
-                    'status': -1,
-                    'message': '请输入openai代理端口'
-                }
-            os.environ['http_proxy'] = 'http://127.0.0.1:'+port
-            os.environ["https_proxy"] = "http://127.0.0.1:"+port
+            # if port == '':
+            #     return {
+            #         'status': -1,
+            #         'message': '请输入openai代理端口'
+            #     }
+            if port != None:
+                os.environ['http_proxy'] = 'http://127.0.0.1:'+port
+                os.environ["https_proxy"] = "http://127.0.0.1:"+port
         elif type=='azure':
             if endpoint == '':
                 return {
