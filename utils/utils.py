@@ -369,7 +369,7 @@ def build_query(path, tokenizer, question, history):
     elif "Baichuan-13B-Chat" == model_name:
         for q, a in history:
             query += tokenizer.user_token + q + tokenizer.assistant_token + a + tokenizer.eos_token
-        query += tokenizer.user_token + question + tokenizer.assistant_token + tokenizer.eos_token
+        query += tokenizer.user_token + question + tokenizer.assistant_token
     else:
         raise NotImplementedError("Model is not implemented.")
     return query
