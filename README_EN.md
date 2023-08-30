@@ -101,6 +101,7 @@ $ pip install -r requirements.txt
   - [x] [FreedomIntelligence/phoenix-chat-7b](https://huggingface.co/FreedomIntelligence/phoenix-chat-7b)
   - [x] [JosephusCheung/Guanaco](https://huggingface.co/JosephusCheung/Guanaco)
   - [x] [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B)
+  - [x] [Baichuan-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan-13B-Chat)
   - [x] [THUDM/chatglm2-6b](https://huggingface.co/THUDM/chatglm2-6b)
   - [x] [internlm/internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
