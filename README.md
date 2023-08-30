@@ -74,8 +74,8 @@ $ pip install -r requirements.txt
 - **output** ：训练中的checkpoints
 - **models** ：模型文件
   - **LLM** ：语言大模型文件
-  - **Embedding** ：嵌入模型文件  
-  - **LoRA** ：LoRA模型文件  
+  - **Embedding** ：嵌入模型文件
+  - **LoRA** ：LoRA模型文件
   - **live2d_models** ：[live2d模型文件](https://www.live2d.com/en/download/sample-data/)
   - **svc_models** ：svc相关文件
     - **hubert_model** ：[声音编码器模型文件](https://github.com/bshall/hubert/releases/download/v0.1/hubert-soft-0d54a1f4.pt)
@@ -158,13 +158,17 @@ $ pip install -r requirements.txt
             - [ ] [vits 训练](https://github.com/SayaSS/vits-finetuning)
             - [X] [svc 调用](https://github.com/LC1332/Chat-Haruhi-Suzumiya)
             - [ ] [svc 训练](https://github.com/svc-develop-team/so-vits-svc)
-        - [ ] 嘴型
-            - [x] [live2D](https://www.live2d.com/en/download/sample-data/)
-            - [ ] 真人
-        - [ ] 表情
-        - [ ] 动作
-        - [ ] 场景
+        - [ ] [live2D](https://www.live2d.com/en/download/sample-data/)
+          - [x] 嘴型
           - [X] live2d 场景自定义 
+          - [ ] 表情
+          - [ ] 动作
+        - [ ] 真人
+          - [ ] 嘴型
+          - [ ] 表情
+          - [ ] 动作
+          - [ ] 场景
+          
 - [ ] 增加 API 支持
   - [ ] 利用 fastapi 实现 API 部署方式
   - [ ] 实现调用 API 的 Web UI Demo

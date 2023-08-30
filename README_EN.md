@@ -160,13 +160,17 @@ $ pip install -r requirements.txt
             - [ ] [vits Train](https://github.com/SayaSS/vits-finetuning)
             - [X] [svc Call](https://github.com/LC1332/Chat-Haruhi-Suzumiya)
             - [ ] [svc Train](https://github.com/svc-develop-team/so-vits-svc)
-        - [ ] Mouth Synchronize
-            - [x] [live2D](https://www.live2d.com/en/download/sample-data/)
-            - [ ] real person
-        - [ ] Emotion
-        - [ ] movement
-        - [ ] Field
-          - [X] Customized background
+        - [ ] [live2D](https://www.live2d.com/en/download/sample-data/)
+            - [x] Mouth Synchronize
+            - [X] Customized background
+            - [ ] Emotion
+            - [ ] movement
+        - [ ] real person
+          - [ ] Mouth Synchronize
+          - [ ] Emotion
+          - [ ] movement
+          - [ ] Field
+            
 - [ ] Add API Support
   - [ ] Deploy API by fastapi
   - [ ] Implement WEB UI Demo by API call
