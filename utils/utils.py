@@ -58,7 +58,8 @@ def copy_custom_files(source, target):
         shutil.copy(os.path.join(source, "configuration_baichuan.py"), target)
         shutil.copy(os.path.join(source, "modeling_baichuan.py"), target)
         shutil.copy(os.path.join(source, "quantizer.py"), target)
-        shutil.copy(os.path.join(source, "tokenization_baichaun.py"), target)
+        shutil.copy(os.path.join(source, "tokenization_baichuan.py"), target)
+        shutil.copy(os.path.join(path, "handler.py"), target)
     elif "internlm-chat-7b-8k" == model_name:
         shutil.copy(os.path.join(source, "configuration_internlm.py"), target)
         shutil.copy(os.path.join(source, "modeling_internlm.py"), target)
