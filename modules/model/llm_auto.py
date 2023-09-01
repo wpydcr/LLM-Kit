@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # import sys
 # sys.path.append('../..')
 from utils.utils import get_model_tokenizer, build_query
