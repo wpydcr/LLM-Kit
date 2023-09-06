@@ -929,7 +929,7 @@ class chat_base_model():
             history list, and an empty string.
         """
         if input == '':
-            raise gr.Error("请输入问题")
+            yield chatbot, history, ''
         if net and search_key == '':
             raise gr.Error("请输入search_key")
         elif net and search != '':
