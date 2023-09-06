@@ -4,6 +4,7 @@
   "应用": "apply",
   "训练": "train",
   "刷新": "Refresh",
+  "API base:":"API base:",
   "选择模型": "Choose Model",
   "API列表": "API List",
   "openai参数": "OpenAI Parameters",

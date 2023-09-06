@@ -89,22 +89,23 @@ def load_llm_params(api_list, model_list, lora_list, *args):
             params['name'] = 'openai'
             params['api_key'] = args[0]
             params['port'] = args[1]
+            params['api_base'] = args[2]
         elif api_list == 'azure openai':
             params['name'] = 'azure openai'
-            params['api_key'] = args[2]
-            params['endpoint'] = args[3]
-            params['engine'] = args[4]
+            params['api_key'] = args[3]
+            params['endpoint'] = args[4]
+            params['engine'] = args[5]
         else:
             pass
         return chat_api.set_llm(params)
     elif model_list is not None:
         params['name'] = model_list
         params['lora'] = lora_list
-        params['quantization'] = args[5]
-        params['max_length'] = args[6]
-        params['top_p'] = args[7]
-        params['temperature'] = args[8]
-        # params['use_deepspeed'] = args[9]
+        params['quantization'] = args[6]
+        params['max_length'] = args[7]
+        params['top_p'] = args[8]
+        params['temperature'] = args[9]
+        # params['use_deepspeed'] = args[10]
         return chat_api.set_llm(params)
     raise gr.Error('请选择API或模型')
 
@@ -208,6 +209,8 @@ class Avtar():
                                 lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                             openai_port = gr.Textbox(
                                 lines=1, value='', label="*VPN proxyPort:")
+                            openai_api_base = gr.Textbox(
+                                lines=1, value='', label="API base:")
                         with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as azure_openai_params:
                             azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -273,7 +276,7 @@ class Avtar():
                     save1 = gr.Button(localizer("保存设定"),variant="primary")
                     emptyConfigBtn = gr.Button(localizer("清空设定"))
         
-        total_params = [openai_api_key, openai_port, azure_api_key, azure_endpoint, azure_engine,quantization,max_length,top_p,temperature]
+        total_params = [openai_api_key, openai_port, openai_api_base, azure_api_key, azure_endpoint, azure_engine,quantization,max_length,top_p,temperature]
         total_config_params = [embedding_openai_api_key, embedding_openai_port, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
 
         gen_type.change(handle_online_tts,inputs=gen_type,outputs= lang)

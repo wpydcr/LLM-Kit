@@ -1,5 +1,5 @@
 import os
-from langchain.chat_models import ChatOpenAI,AzureChatOpenAI
+from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.memory import ChatMessageHistory
@@ -10,7 +10,7 @@ import json
 import zhipuai
 from modules.model.SparkApi import Spark_Api
 import dashscope
-from dashscope import Generation,TextEmbedding
+from dashscope import Generation, TextEmbedding
 from http import HTTPStatus
 import json
 from modules.model.prompt_generator import prompt_generator
@@ -19,7 +19,8 @@ p_generator = prompt_generator()
 
 real_path = os.path.split(os.path.realpath(__file__))[0]
 
-def get_ernie_access_token(API_Key,Secret_Key):
+
+def get_ernie_access_token(API_Key, Secret_Key):
 
     url = f"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={API_Key}&client_secret={Secret_Key}"
     headers = {
@@ -41,7 +42,7 @@ class ali_api():
     def get_embedding(self):
         pass
 
-    def setv(self,api_key,top_p=0.8,top_k=100.0,kuake_search=False):
+    def setv(self, api_key, top_p=0.8, top_k=100.0, kuake_search=False):
         if api_key == '':
             return {
                 'status': -1,
@@ -56,16 +57,16 @@ class ali_api():
             'message': '设置成功'
         }
 
-
-    def get_ones(self,message):
-        if type(message)==str:
+    def get_ones(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
-            messages,history = p_generator.generate_ali_prompt(message=message,history=[])
+            messages, history = p_generator.generate_ali_prompt(
+                message=message, history=[])
         else:
             messages = message[-1]['user']
             history = message[:-1]
         try:
-            response=Generation.call(
+            response = Generation.call(
                 model='qwen-v1',
                 history=history,
                 prompt=messages,
@@ -73,30 +74,33 @@ class ali_api():
                 top_k=self.top_k,
                 enable_search=self.kuake_search,
                 stream=False
-                )
-            if response.status_code==HTTPStatus.OK:
+            )
+            if response.status_code == HTTPStatus.OK:
                 return {
                     'status': 0,
                     'message': response.output.text
                 }
             else:
-                print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                print('Error:Code: %d, status: %s, message: %s' %
+                      (response.status_code, response.code, response.message))
                 return {
                     'status': -1,
                     'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
                 }
         except:
-            print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+            print('Error:Code: %d, status: %s, message: %s' %
+                  (response.status_code, response.code, response.message))
             return {
-                    'status': -1,
-                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                'status': -1,
+                'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
             }
-        
-    def get_ones_stream(self,message):
+
+    def get_ones_stream(self, message):
         history = []
-        if type(message)==str:
+        if type(message) == str:
             message = message.replace("\n", " ")
-            messages,history = p_generator.generate_ali_prompt(message=message,history=[])
+            messages, history = p_generator.generate_ali_prompt(
+                message=message, history=[])
         else:
             messages = message[-1]['user']
             history = message[:-1]
@@ -109,25 +113,27 @@ class ali_api():
                 top_k=self.top_k,
                 enable_search=self.kuake_search,
                 stream=True
-                ):
-                if response.status_code==HTTPStatus.OK:
+            ):
+                if response.status_code == HTTPStatus.OK:
                     yield {
                         'status': 0,
                         'message': response.output.text
                     }
                 else:
-                    print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                    print('Error:Code: %d, status: %s, message: %s' %
+                          (response.status_code, response.code, response.message))
                     yield {
                         'status': -1,
                         'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
                     }
         except:
-            print('Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+            print('Code: %d, status: %s, message: %s' %
+                  (response.status_code, response.code, response.message))
             yield {
-                    'status': -1,
-                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                'status': -1,
+                'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
             }
-        
+
     def cut_memory(self):
         if len(self.history.messages) == 0:
             return {
@@ -143,9 +149,10 @@ class ali_api():
             'message': '裁剪历史记录成功'
         }
 
-    def talk(self,message,stream=False):
+    def talk(self, message, stream=False):
         message = message.replace("\n", " ")
-        messages,history = p_generator.generate_ali_prompt(message=message,history=self.history.messages)
+        messages, history = p_generator.generate_ali_prompt(
+            message=message, history=self.history.messages)
         if stream:
             total_reply = ''
             try:
@@ -157,15 +164,16 @@ class ali_api():
                     top_k=self.top_k,
                     enable_search=self.kuake_search,
                     stream=True
-                    ):
-                    if response.status_code==HTTPStatus.OK:
+                ):
+                    if response.status_code == HTTPStatus.OK:
                         total_reply += response.output.text
                         yield {
                             'status': 0,
                             'message': response.output.text
                         }
                     else:
-                        print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                        print('Error:Code: %d, status: %s, message: %s' % (
+                            response.status_code, response.code, response.message))
                         yield {
                             'status': -1,
                             'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
@@ -174,14 +182,15 @@ class ali_api():
                 self.history.messages.append(message)
                 self.history.messages.append(total_reply)
             except:
-                print('Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                print('Code: %d, status: %s, message: %s' %
+                      (response.status_code, response.code, response.message))
                 yield {
-                        'status': -1,
-                        'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                    'status': -1,
+                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
                 }
         else:
             try:
-                response=Generation.call(
+                response = Generation.call(
                     model='qwen-v1',
                     history=history,
                     prompt=messages,
@@ -189,8 +198,8 @@ class ali_api():
                     top_k=self.top_k,
                     enable_search=self.kuake_search,
                     stream=False
-                    )
-                if response.status_code==HTTPStatus.OK:
+                )
+                if response.status_code == HTTPStatus.OK:
                     self.history.messages.append(message)
                     self.history.messages.append(response.output.text)
                     yield {
@@ -198,20 +207,23 @@ class ali_api():
                         'message': response.output.text
                     }
                 else:
-                    print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                    print('Error:Code: %d, status: %s, message: %s' %
+                          (response.status_code, response.code, response.message))
                     yield {
                         'status': -1,
                         'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
                     }
             except:
-                print('Error:Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message))
+                print('Error:Code: %d, status: %s, message: %s' %
+                      (response.status_code, response.code, response.message))
                 yield {
-                        'status': -1,
-                        'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
+                    'status': -1,
+                    'message': 'Code: %d, status: %s, message: %s' % (response.status_code, response.code, response.message)
                 }
-        
+
     def clear_history(self):
         self.history = ChatMessageHistory()
+
 
 class spark_api():
     def __init__(self):
@@ -220,11 +232,11 @@ class spark_api():
     def get_embedding(self):
         pass
 
-    def setv(self,spark_api_key=None,spark_api_secret=None,spark_appid=None,temperature=0.95,top_k=4,max_tokens=2048,spark_api_version="V1.5"):
+    def setv(self, spark_api_key=None, spark_api_secret=None, spark_appid=None, temperature=0.95, top_k=4, max_tokens=2048, spark_api_version="V1.5"):
         if spark_appid == '':
             return {
                 'status': -1,
-                'message':'请输入spark appid'
+                'message': '请输入spark appid'
             }
         if spark_api_key == '':
             return {
@@ -234,7 +246,7 @@ class spark_api():
         if spark_api_secret == '':
             return {
                 'status': -1,
-                'message':'请输入spark api secret'
+                'message': '请输入spark api secret'
             }
         self.spark_api_key = spark_api_key
         self.spark_api_secret = spark_api_secret
@@ -250,21 +262,22 @@ class spark_api():
             self.gpt_url = "ws://spark-api.xf-yun.com/v2.1/chat"
         else:
             return {
-                "status":-1,
-                "message":"API版本错误"
+                "status": -1,
+                "message": "API版本错误"
             }
-        self.spark_api = Spark_Api(self.spark_appid,self.spark_api_secret,self.spark_api_key,self.temperature,self.top_k,self.max_tokens,self.gpt_url,self.domain)
+        self.spark_api = Spark_Api(self.spark_appid, self.spark_api_secret, self.spark_api_key,
+                                   self.temperature, self.top_k, self.max_tokens, self.gpt_url, self.domain)
         self.spark_api.create_ws()
         return {
             'status': 0,
             'message': '设置成功'
         }
 
-    def get_ones(self,message):
-        if type(message)==str:
+    def get_ones(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
             message = p_generator.generate_spark_prompt(message=message)
-        messages=message
+        messages = message
         try:
             total_text = ''
             for response in self.spark_api._call(messages):
@@ -286,12 +299,12 @@ class spark_api():
                 'status': -1,
                 'message': str(e)
             }
-        
-    def get_ones_stream(self,message):
-        if type(message)==str:
+
+    def get_ones_stream(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
             message = p_generator.generate_spark_prompt(message=message)
-        messages=message
+        messages = message
         try:
             for response in self.spark_api._call(messages):
                 if response['status'] == 0:
@@ -312,7 +325,7 @@ class spark_api():
                 'status': -1,
                 'message':  str(e)
             }
-        
+
     def cut_memory(self):
         if len(self.history.messages) == 0:
             return {
@@ -328,9 +341,10 @@ class spark_api():
             'message': '裁剪历史记录成功'
         }
 
-    def talk(self,message,stream=False):
+    def talk(self, message, stream=False):
         message = message.replace("\n", " ")
-        messages = p_generator.generate_spark_prompt(message=message,history=self.history.messages)
+        messages = p_generator.generate_spark_prompt(
+            message=message, history=self.history.messages)
         if stream:
             total_text = ''
             try:
@@ -381,10 +395,11 @@ class spark_api():
                     'status': -1,
                     'message': str(e)
                 }
-        
+
     def clear_history(self):
         self.history = ChatMessageHistory()
-    
+
+
 class chatglm_api():
     def __init__(self):
         self.history = ChatMessageHistory()
@@ -392,7 +407,7 @@ class chatglm_api():
     def get_embedding(self):
         pass
 
-    def setv(self,api_key=None,temperature=0.95,top_p=0.7,chatglm_type='std'):
+    def setv(self, api_key=None, temperature=0.95, top_p=0.7, chatglm_type='std'):
         if api_key == '':
             return {
                 'status': -1,
@@ -408,11 +423,11 @@ class chatglm_api():
             'message': '设置成功'
         }
 
-    def get_ones(self,message):
-        if type(message)==str:
+    def get_ones(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
             message = p_generator.generate_chatglm_prompt(message=message)
-        messages=message
+        messages = message
         try:
             response = zhipuai.model_api.invoke(
                 model='chatglm_'+self.chatglm_type,
@@ -428,19 +443,19 @@ class chatglm_api():
                 print(response)
                 return {
                     'status': -1,
-                    'message': 'code:%s, message:%s' % (response['code'],response['msg'])
+                    'message': 'code:%s, message:%s' % (response['code'], response['msg'])
                 }
         except Exception as e:
             return {
                 'status': -1,
                 'message': str(e)
             }
-        
-    def get_ones_stream(self,message):
-        if type(message)==str:
+
+    def get_ones_stream(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
             message = p_generator.generate_chatglm_prompt(message=message)
-        messages=message
+        messages = message
         try:
             response = zhipuai.model_api.sse_invoke(
                 model='chatglm_'+self.chatglm_type,
@@ -478,7 +493,7 @@ class chatglm_api():
                 'status': -1,
                 'message': str(e)
             }
-    
+
     def cut_memory(self):
         if len(self.history.messages) == 0:
             return {
@@ -493,10 +508,11 @@ class chatglm_api():
             'status': 0,
             'message': '裁剪历史记录成功'
         }
-    
-    def talk(self,message,stream=False):
+
+    def talk(self, message, stream=False):
         message = message.replace("\n", " ")
-        messages = p_generator.generate_chatglm_prompt(message=message,history=self.history.messages)
+        messages = p_generator.generate_chatglm_prompt(
+            message=message, history=self.history.messages)
         if stream:
             total_reply = ''
             try:
@@ -545,9 +561,9 @@ class chatglm_api():
                     'message': response['message']
                 }
 
-
     def clear_history(self):
         self.history = ChatMessageHistory()
+
 
 class ernie_api():
     def __init__(self) -> None:
@@ -556,7 +572,7 @@ class ernie_api():
     def get_embedding(self):
         pass
 
-    def setv(self,ernie_api_key=None,ernie_secret_key=None,ernie_temperature=0.95,ernie_top_p=0.8,ernie_penalty_score=1,ernie_type='ernie bot'):
+    def setv(self, ernie_api_key=None, ernie_secret_key=None, ernie_temperature=0.95, ernie_top_p=0.8, ernie_penalty_score=1, ernie_type='ernie bot'):
         if ernie_api_key == '':
             return {
                 'status': -1,
@@ -585,7 +601,8 @@ class ernie_api():
         self.top_p = ernie_top_p
         self.penalty_score = ernie_penalty_score
 
-        self.access_token = get_ernie_access_token(ernie_api_key,ernie_secret_key)
+        self.access_token = get_ernie_access_token(
+            ernie_api_key, ernie_secret_key)
         if self.access_token == None:
             return {
                 'status': -1,
@@ -593,7 +610,7 @@ class ernie_api():
             }
 
         self.query = {
-            'access_token':self.access_token
+            'access_token': self.access_token
         }
 
         return {
@@ -601,36 +618,38 @@ class ernie_api():
             'message': '设置成功'
         }
 
-    def get_ones(self,message):
-        if type(message)==str:
+    def get_ones(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
             message = p_generator.generate_ernie_prompt(message=message)
         if self.ernie_type == 'ernie bot':
             body = {
-                'messages':message,
-                'temperature':self.temperature,
-                'top_p':self.top_p,
-                'penalty_score':self.penalty_score,
-                'stream':False
+                'messages': message,
+                'temperature': self.temperature,
+                'top_p': self.top_p,
+                'penalty_score': self.penalty_score,
+                'stream': False
             }
         elif self.ernie_type == 'ernie bot turbo':
             body = {
-                'messages':message,
-                'stream':False
+                'messages': message,
+                'stream': False
             }
         try:
-            response = requests.request("POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
+            response = requests.request(
+                "POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
             response = json.loads(response.text)
-            if response.get('result',None) is not None:
+            if response.get('result', None) is not None:
                 return {
                     'status': 0,
                     'message': response['result']
                 }
             else:
-                print('code:%s message:%s' % (response['error_code'],response['error_msg']))
+                print('code:%s message:%s' %
+                      (response['error_code'], response['error_msg']))
                 return {
                     'status': -1,
-                    'message': 'code:%s message:%s' % (response['error_code'],response['error_msg'])
+                    'message': 'code:%s message:%s' % (response['error_code'], response['error_msg'])
                 }
         except Exception as e:
             return {
@@ -638,38 +657,40 @@ class ernie_api():
                 'message': str(e)
             }
 
-    def get_ones_stream(self,message):
-        if type(message)==str:
+    def get_ones_stream(self, message):
+        if type(message) == str:
             message = message.replace("\n", " ")
             message = p_generator.generate_ernie_prompt(message=message)
         if self.ernie_type == 'ernie bot':
             body = {
-                'messages':message,
-                'temperature':self.temperature,
-                'top_p':self.top_p,
-                'penalty_score':self.penalty_score,
-                'stream':True
+                'messages': message,
+                'temperature': self.temperature,
+                'top_p': self.top_p,
+                'penalty_score': self.penalty_score,
+                'stream': True
             }
         elif self.ernie_type == 'ernie bot turbo':
             body = {
-                'messages':message,
-                'stream':True
+                'messages': message,
+                'stream': True
             }
 
         try:
-            response = requests.request("POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
+            response = requests.request(
+                "POST", self.url, headers=self.headers, params=self.query, data=json.dumps(body))
             for section in response.iter_lines(decode_unicode=True):
-                section =  json.loads(section)
-                if section.get('result',None) is not None:
+                section = json.loads(section)
+                if section.get('result', None) is not None:
                     yield {
                         'status': 0,
                         'message': section['result']
                     }
                 else:
-                    print('code:%s message:%s' % (section['error_code'],section['error_msg']))
+                    print('code:%s message:%s' %
+                          (section['error_code'], section['error_msg']))
                     yield {
                         'status': -1,
-                        'message': 'code:%s message:%s' % (section['error_code'],section['error_msg'])
+                        'message': 'code:%s message:%s' % (section['error_code'], section['error_msg'])
                     }
         except Exception as e:
             yield {
@@ -692,9 +713,10 @@ class ernie_api():
             'message': '裁剪历史记录成功'
         }
 
-    def talk(self,message,stream=False):
+    def talk(self, message, stream=False):
         message = message.replace("\n", " ")
-        messages = p_generator.generate_ernie_prompt(message=message,history=self.history.messages)
+        messages = p_generator.generate_ernie_prompt(
+            message=message, history=self.history.messages)
         if stream:
             total_reply = ''
             try:
@@ -751,29 +773,32 @@ class openai_api():
     def __init__(self):
         self.history = ChatMessageHistory()
 
-    def get_embedding(self,openai_api_key,port,type='openai', endpoint='',engine=''):
-        if type=='openai':
+    def get_embedding(self, openai_api_key, port, type='openai', endpoint='', engine=''):
+        if type == 'openai':
             openai.api_type = "open_ai"
+            openai.api_base
             if port != None:
-                os.environ['http_proxy'] = 'http://127.0.0.1:'+port
-                os.environ["https_proxy"] = "http://127.0.0.1:"+port
+                os.environ['http_proxy'] = 'http://127.0.0.1:' + port
+                os.environ["https_proxy"] = "http://127.0.0.1:" + port
             self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key)
-        elif type=='azure':
+        elif type == 'azure':
             os.environ['OPENAI_API_BASE'] = endpoint
             os.environ['OPENAI_API_KEY'] = openai_api_key
             os.environ['OPENAI_API_TYPE'] = 'azure'
             # 暂未支持
-            self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key,deployment=engine)
+            self.embedding = OpenAIEmbeddings(
+                openai_api_key=openai_api_key, deployment=engine)
 
-
-    def setv(self,openai_api_key='',temperature=0.95,max_tokens=4096,top_p=0.7,openai_prompt='',port=10809,model="gpt-3.5-turbo", type='openai', endpoint='',engine=""):
+    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=4096, top_p=0.7, openai_prompt='', port=10809, model="gpt-3.5-turbo", type='openai', endpoint='', engine=""):
         if openai_api_key == '':
             return {
                 'status': -1,
                 'message': '请输入openai api key'
             }
-        if type=='openai':
+        if type == 'openai':
             openai.api_type = "open_ai"
+            if api_base != '':
+                openai.api_base = api_base
             # if port == '':
             #     return {
             #         'status': -1,
@@ -782,7 +807,7 @@ class openai_api():
             if port != None:
                 os.environ['http_proxy'] = 'http://127.0.0.1:'+port
                 os.environ["https_proxy"] = "http://127.0.0.1:"+port
-        elif type=='azure':
+        elif type == 'azure':
             if endpoint == '':
                 return {
                     'status': -1,
@@ -793,11 +818,11 @@ class openai_api():
                     'status': -1,
                     'message': '请输入openai engine'
                 }
-        self.charactor_prompt=SystemMessage(content=openai_prompt)
-        self.max_token=max_tokens
-        if max_tokens==0:
-            max_tokens=None
-            self.max_token=4096
+        self.charactor_prompt = SystemMessage(content=openai_prompt)
+        self.max_token = max_tokens
+        if max_tokens == 0:
+            max_tokens = None
+            self.max_token = 4096
         if type == 'openai':
             self.llm = ChatOpenAI(
                 openai_api_key=openai_api_key,
@@ -836,19 +861,20 @@ class openai_api():
                 top_p=top_p,
                 max_tokens=self.max_token)
             # 暂未支持
-            self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key,deployment=engine)
+            self.embedding = OpenAIEmbeddings(
+                openai_api_key=openai_api_key, deployment=engine)
         return {
             'status': 0,
             'message': '设置成功'
         }
 
-            
-    def get_ones(self,text):
-        if type(text)==str:
+    def get_ones(self, text):
+        if type(text) == str:
             text = text.replace("\n", " ")
-            text = p_generator.generate_openai_prompt(message=text,system_message=self.charactor_prompt.content)
-        messages=text
-        if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
+            text = p_generator.generate_openai_prompt(
+                message=text, system_message=self.charactor_prompt.content)
+        messages = text
+        if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
             return '字数超限'
         try:
             response = self.llm_nonstream(messages)
@@ -862,13 +888,14 @@ class openai_api():
                 'status': -1,
                 'message': str(e)
             }
-        
-    def get_ones_stream(self,text):
-        if type(text)==str:
+
+    def get_ones_stream(self, text):
+        if type(text) == str:
             text = text.replace("\n", " ")
-            text = p_generator.generate_openai_prompt(message=text,system_message=self.charactor_prompt.content)
-        messages=text
-        if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
+            text = p_generator.generate_openai_prompt(
+                message=text, system_message=self.charactor_prompt.content)
+        messages = text
+        if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
             return '字数超限'
         try:
             for response in self.llm(messages):
@@ -882,7 +909,7 @@ class openai_api():
                 'status': -1,
                 'message': str(e)
             }
-    
+
     def cut_memory(self):
         if len(self.history.messages) == 0:
             return {
@@ -898,14 +925,15 @@ class openai_api():
             'message': '裁剪历史记录成功'
         }
 
-    def talk(self,message,stream=False):
+    def talk(self, message, stream=False):
         message = message.replace("\n", " ")
-        messages = p_generator.generate_openai_prompt(message=message,system_message=self.charactor_prompt.content,history=self.history.messages)
-        if self.llm.get_num_tokens_from_messages(messages)>=self.max_token-500:
-            self.cut_memory()
-        if stream:
-            total_reply = ''
-            try:
+        messages = p_generator.generate_openai_prompt(
+            message=message, system_message=self.charactor_prompt.content, history=self.history.messages)
+        try:
+            if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
+                self.cut_memory()
+            if stream:
+                total_reply = ''
                 for response in self.llm(messages):
                     if len(response) == 0:
                         break
@@ -916,13 +944,7 @@ class openai_api():
                     }
                 self.history.messages.append(HumanMessage(content=message))
                 self.history.messages.append(AIMessage(content=total_reply))
-            except Exception as e:
-                yield {
-                    'status': -1,
-                    'message': str(e)
-                }
-        else:
-            try:
+            else:
                 response = self.llm_nonstream(messages).content
                 self.history.messages.append(HumanMessage(content=message))
                 self.history.messages.append(AIMessage(content=response))
@@ -930,12 +952,11 @@ class openai_api():
                     'status': 0,
                     'message': response
                 }
-            except Exception as e:
-                yield {
-                    'status': -1,
-                    'message': str(e)
-                }
-    
+        except Exception as e:
+            yield {
+                'status': -1,
+                'message': str(e)
+            }
+
     def clear_history(self):
         self.history = ChatMessageHistory()
-
