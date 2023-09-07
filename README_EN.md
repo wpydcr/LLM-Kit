@@ -124,6 +124,7 @@ $ pip install -r requirements.txt
   - [ ] Chat
     - [X] LLM API Parallel call
     - [X] LLM API Streaming model
+    - [x] Prompt templates
   - [ ] Image Generation
     - [x] [Midjourney](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2

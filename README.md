@@ -87,7 +87,7 @@ $ pip install -r requirements.txt
 ## 发展路线图
 
 - [x] LLM API支持(无需显卡)
-  - [x] [openai(VPN)](https://platform.openai.com/account/api-keys)
+  - [x] [openai(支持国内中转)](https://platform.openai.com/account/api-keys)
   - [x] [azure openai](https://learn.microsoft.com/zh-cn/azure/cognitive-services/openai/)
   - [x] [文心一言](https://cloud.baidu.com/survey_summit/qianfan.html)
   - [x] [智谱GLM](https://open.bigmodel.cn/usercenter/apikeys)
@@ -122,6 +122,7 @@ $ pip install -r requirements.txt
   - [ ] 聊天
     - [X] LLM API 并行调用
     - [X] LLM API 流式调用
+    - [x] 提示词模板
   - [ ] 图像生成
     - [x] [Midjourney(VPN)](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2
