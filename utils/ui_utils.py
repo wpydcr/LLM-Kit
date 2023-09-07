@@ -766,7 +766,7 @@ class chat_base_api():
                """
         if self.api_type == 'openai':
             response = self.llm.setv(openai_api_key=params['api_key'], api_base=params['api_base'], openai_prompt=params.get(
-                'prompt', ''), port=params['port'])
+                'prompt', ''), port=params['port'], model=params['api_model'])
         elif self.api_type == 'azure openai':
             response = self.llm.setv(openai_api_key=params['api_key'], openai_prompt=params.get(
                 'prompt', ''), type='azure', endpoint=params['endpoint'], engine=params['engine'])

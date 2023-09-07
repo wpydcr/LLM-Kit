@@ -62,6 +62,7 @@ class Parallel_api(object):
                 'api_key': params['openai_api_key'],
                 'port': params['openai_port'],
                 'api_base': params['openai_api_base'],
+                'api_model':params['openai_api_model'],
                 'prompt': params['prompt']
             }
             self.api_threads['openai'] = api_thread(api_params)
@@ -146,7 +147,9 @@ class Parallel_api(object):
                 doc_params = {
                     'name': params['emb_name'],
                     'api_key': params['emb_api_key'],
-                    'port': params['port'],
+                    'port': params['emb_port'],
+                    'api_base': params['emb_api_base'],
+                    'api_model': params['emb_api_model'],
                     'doc': params['doc'],
                     'k': params['k'],
                     'score_threshold': params['score_threshold'],
@@ -415,11 +418,13 @@ class ParallelLocalModel():
                 params['name'] = 'openai'
                 params['api_key'] = args[0]
                 params['port'] = args[1]
+                params['api_base'] = args[2]
+                params['api_model'] = args[3]
             elif emb_api_list == 'azure openai':
                 params['name'] = 'azure openai'
-                params['api_key'] = args[2]
-                params['endpoint'] = args[3]
-                params['engine'] = args[4]
+                params['api_key'] = args[4]
+                params['endpoint'] = args[5]
+                params['engine'] = args[6]
             else:
                 pass
         elif emb_model_list is not None:

@@ -86,54 +86,55 @@ def load_params(api_list, model_list, lora_list, *args):
             params['api_key'] = args[1]
             params['port'] = args[2]
             params['api_base'] = args[3]
+            params['api_model'] = args[4]
         elif api_list == 'azure openai':
             params['name'] = 'azure openai'
-            params['api_key'] = args[4]
-            params['endpoint'] = args[5]
-            params['engine'] = args[6]
+            params['api_key'] = args[5]
+            params['endpoint'] = args[6]
+            params['engine'] = args[7]
         elif api_list == 'ernie bot':
             params['name'] = 'ernie bot'
-            params['api_key'] = args[7]
-            params['secret_key'] = args[8]
-            params['temperature'] = args[9]
-            params['top_p'] = args[10]
-            params['penalty_score'] = args[11]
+            params['api_key'] = args[8]
+            params['secret_key'] = args[9]
+            params['temperature'] = args[10]
+            params['top_p'] = args[11]
+            params['penalty_score'] = args[12]
         elif api_list == 'ernie bot turbo':
             params['name'] = 'ernie bot turbo'
-            params['api_key'] = args[12]
-            params['secret_key'] = args[13]
+            params['api_key'] = args[13]
+            params['secret_key'] = args[14]
         elif api_list == 'chatglm api':
             params['name'] = 'chatglm api'
-            params['api_key'] = args[14]
-            params['temperature'] = args[15]
-            params['top_p'] = args[16]
-            params['type'] = args[17]
+            params['api_key'] = args[15]
+            params['temperature'] = args[16]
+            params['top_p'] = args[17]
+            params['type'] = args[18]
         elif api_list == 'spark api':
             params['name'] = 'spark api'
-            params['appid'] = args[18]
-            params['api_key'] = args[19]
-            params['secret_key'] = args[20]
-            params['api_version'] = args[21]
-            params['temperature'] = args[22]
-            params['top_k'] = args[23]
-            params['max_tokens'] = args[24]
+            params['appid'] = args[19]
+            params['api_key'] = args[20]
+            params['secret_key'] = args[21]
+            params['api_version'] = args[22]
+            params['temperature'] = args[23]
+            params['top_k'] = args[24]
+            params['max_tokens'] = args[25]
         elif api_list == 'ali api':
             params['name'] = 'ali api'
-            params['api_key'] = args[25]
-            params['top_p'] = args[26]
-            params['top_k'] = args[27]
-            params['kuake_search'] = args[28]
+            params['api_key'] = args[26]
+            params['top_p'] = args[27]
+            params['top_k'] = args[28]
+            params['kuake_search'] = args[29]
         else:
             pass
         return chat_model.load_api_params(params)
     elif model_list is not None:
         params['name'] = model_list
         params['lora'] = lora_list
-        params['quantization'] = args[29]
-        params['max_length'] = args[30]
-        params['top_p'] = args[31]
-        params['temperature'] = args[32]
-        params['use_deepspeed'] = args[33]
+        params['quantization'] = args[30]
+        params['max_length'] = args[31]
+        params['top_p'] = args[32]
+        params['temperature'] = args[33]
+        params['use_deepspeed'] = args[34]
         return chat_model.load_model(params)
     raise gr.Error('请选择API或模型')
 
@@ -213,6 +214,7 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         params['openai_api_key'] = args[0]
         params['openai_port'] = args[1]
         params['openai_api_base'] = args[2]
+        params['openai_api_model'] = args[3]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -220,9 +222,9 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'azure openai' in api_api_list:
         params['api_list'].append('azure openai')
-        params['azure_api_key'] = args[3]
-        params['azure_endpoint'] = args[4]
-        params['azure_engine'] = args[5]
+        params['azure_api_key'] = args[4]
+        params['azure_endpoint'] = args[5]
+        params['azure_engine'] = args[6]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -230,11 +232,11 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'ernie bot' in api_api_list:
         params['api_list'].append('ernie bot')
-        params['ernie_api_key'] = args[6]
-        params['ernie_secret_key'] = args[7]
-        params['ernie_temperature'] = args[8]
-        params['ernie_top_p'] = args[9]
-        params['ernie_penalty_score'] = args[10]
+        params['ernie_api_key'] = args[7]
+        params['ernie_secret_key'] = args[8]
+        params['ernie_temperature'] = args[9]
+        params['ernie_top_p'] = args[10]
+        params['ernie_penalty_score'] = args[11]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -242,8 +244,8 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'ernie bot turbo' in api_api_list:
         params['api_list'].append('ernie bot turbo')
-        params['ernie_turbo_api_key'] = args[11]
-        params['ernie_turbo_secret_key'] = args[12]
+        params['ernie_turbo_api_key'] = args[12]
+        params['ernie_turbo_secret_key'] = args[13]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -251,10 +253,10 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'chatglm api' in api_api_list:
         params['api_list'].append('chatglm api')
-        params['chatglm_api_key'] = args[13]
-        params['chatglm_temperature'] = args[14]
-        params['chatglm_top_p'] = args[15]
-        params['chatglm_type'] = args[16]
+        params['chatglm_api_key'] = args[14]
+        params['chatglm_temperature'] = args[15]
+        params['chatglm_top_p'] = args[16]
+        params['chatglm_type'] = args[17]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -262,13 +264,13 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'spark api' in api_api_list:
         params['api_list'].append('spark api')
-        params['spark_appid'] = args[17]
-        params['spark_api_key'] = args[18]
-        params['spark_secret_key'] = args[19]
-        params['spark_api_version'] = args[20]
-        params['spark_temperature'] = args[21]
-        params['spark_top_k'] = args[22]
-        params['spark_max_tokens'] = args[23]
+        params['spark_appid'] = args[18]
+        params['spark_api_key'] = args[19]
+        params['spark_secret_key'] = args[20]
+        params['spark_api_version'] = args[21]
+        params['spark_temperature'] = args[22]
+        params['spark_top_k'] = args[23]
+        params['spark_max_tokens'] = args[24]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -276,10 +278,10 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'ali api' in api_api_list:
         params['api_list'].append('ali api')
-        params['ali_api_key'] = args[24]
-        params['ali_top_p'] = args[25]
-        params['ali_top_k'] = args[26]
-        params['ali_kuake_search'] = args[27]
+        params['ali_api_key'] = args[25]
+        params['ali_top_p'] = args[26]
+        params['ali_top_k'] = args[27]
+        params['ali_kuake_search'] = args[28]
         returns.append(gr.update(visible=True,value=None))
         returns.append(gr.update(visible=True if use_knowledge else False,value=None))
     else:
@@ -290,13 +292,15 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         if api_emb_api_list is not None:
             if 'openai' == api_emb_api_list:
                 params['emb_name'] = 'openai'
-                params['emb_api_key'] = args[28]
-                params['emb_port'] = args[29]
+                params['emb_api_key'] = args[29]
+                params['emb_port'] = args[30]
+                params['emb_api_base'] = args[31]
+                params['emb_api_model'] = args[32]
             elif 'azure openai' == api_emb_api_list:
                 params['emb_api'] = 'azure openai'
-                params['emb_api_key'] = args[30]
-                params['emb_endpoint'] = args[31]
-                params['emb_engine'] = args[32]
+                params['emb_api_key'] = args[33]
+                params['emb_endpoint'] = args[34]
+                params['emb_engine'] = args[35]
         elif api_emb_model_list is not None:
             params['emb_name'] = api_emb_model_list
         else:
@@ -351,6 +355,8 @@ def chat_page(localizer):
                                 lines=1, value='', label="VPN proxyPort:")
                             openai_api_base = gr.Textbox(
                                 lines=1, value='', label=localizer("API base:"))
+                            openai_api_model = gr.Radio(
+                                ['gpt-3.5-turbo','gpt-4'], label=localizer("API模型"), value='gpt-3.5-turbo')
                         with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as azure_openai_params:
                             azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -490,6 +496,8 @@ def chat_page(localizer):
                             lines=1, value='', label="VPN proxyPort:")
                         api_openai_api_base = gr.Textbox(
                             lines=1, value='', label=localizer("API base:"))
+                        api_openai_api_model = gr.Radio(
+                                ['gpt-3.5-turbo','gpt-4'], label=localizer("API模型"), value='gpt-3.5-turbo')
                     with gr.Accordion(localizer("azure openai参数"), open=False, visible=False) as api_azure_openai_params:
                         api_azure_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -561,6 +569,10 @@ def chat_page(localizer):
                                 lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                             api_embedding_openai_port = gr.Textbox(
                                 lines=1, value='', label="VPN proxyPort:")
+                            api_embedding_openai_api_base = gr.Textbox(
+                            lines=1, value='', label=localizer("API base:"))
+                            api_embedding_openai_api_model = gr.Radio(
+                                    ['text-embedding-ada-002'], label=localizer("API模型"), value='text-embedding-ada-002')
                         with gr.Accordion(localizer('azure openai参数'), open=True, visible=False) as api_emb_azure_openai_params:
                             api_embedding_azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -643,6 +655,10 @@ def chat_page(localizer):
                                 lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                             embedding_openai_port = gr.Textbox(
                                 lines=1, value='', label="VPN proxyPort:")
+                            embedding_openai_api_base = gr.Textbox(
+                            lines=1, value='', label=localizer("API base:"))
+                            embedding_openai_api_model = gr.Radio(
+                                    ['text-embedding-ada-002'], label=localizer("API模型"), value='text-embedding-ada-002')
                         with gr.Accordion(localizer('azure openai参数'), open=True, visible=False) as emb_azure_openai_params:
                             embedding_azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -671,7 +687,7 @@ def chat_page(localizer):
                         1, 20, value=3, step=1, label=localizer("搜索条数:"), interactive=True)
 
     dual_local.select(ParallelLocalModel.handle_local_model_selected, outputs=[local_chatbot1, local_chatbot2])
-    embedding_total_params = [embedding_openai_api_key, embedding_openai_port, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
+    embedding_total_params = [embedding_openai_api_key, embedding_openai_port, embedding_openai_api_base, embedding_openai_api_model, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
 
     save0.click(parallel_local_model.load_embedding_params, [status,switch_chatbot,doc1, k, score_threshold, chunk_size, chunk_conent, emb_api_list,
                                         emb_model_list] + embedding_total_params,[status], show_progress=True)
@@ -680,7 +696,7 @@ def chat_page(localizer):
     emb_api_list.change(emb_api_select, inputs=[emb_api_list, emb_model_list],
                         outputs=[emb_openai_params, emb_azure_openai_params, emb_api_list, emb_model_list])
 
-    total_params = [prompt, openai_api_key, openai_port, openai_api_base, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
+    total_params = [prompt, openai_api_key, openai_port, openai_api_base, openai_api_model, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
                     ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed]
 
     history = gr.State([])
@@ -729,9 +745,9 @@ def chat_page(localizer):
                     openai_params, azure_openai_params, ernie_bot_params, ernie_bot_turbo_params, chatglm_params, spark_params, ali_params, api_list, model_list, lora_list])
 
     # API并行调用页面
-    api_total_params = [api_openai_api_key, api_openai_port, api_openai_api_base, api_azure_api_key, api_azure_endpoint, api_azure_engine, api_ernie_api_key, api_ernie_secret_key, api_ernie_temperature, api_ernie_top_p, api_ernie_penalty_score, api_ernie_turbo_api_key,
+    api_total_params = [api_openai_api_key, api_openai_port, api_openai_api_base, api_openai_api_model, api_azure_api_key, api_azure_endpoint, api_azure_engine, api_ernie_api_key, api_ernie_secret_key, api_ernie_temperature, api_ernie_top_p, api_ernie_penalty_score, api_ernie_turbo_api_key,
                         api_ernie_turbo_secret_key, api_chatglm_api_key, api_chatglm_temperature, api_chatglm_top_p, api_chatglm_type, api_spark_appid, api_spark_api_key, api_spark_secret_key, api_spark_api_version, api_spark_temperature, api_spark_top_k, api_spark_max_tokens, api_ali_api_key, api_ali_top_p, api_ali_top_k, api_ali_kuake_search]
-    api_embed_total_params = [api_embedding_openai_api_key, api_embedding_openai_port,
+    api_embed_total_params = [api_embedding_openai_api_key, api_embedding_openai_port,api_embedding_openai_api_base, api_embedding_openai_api_model,
                               api_embedding_azure_api_key, api_embedding_azure_endpoint, api_embedding_azure_engine]
     api_api_list.change(show_api_params_add_api, inputs=[api_api_list], outputs=[api_openai_params, api_azure_openai_params,
                         api_ernie_bot_params, api_ernie_bot_turbo_params, api_chatglm_params, api_spark_params, api_ali_params, api_selected_api])

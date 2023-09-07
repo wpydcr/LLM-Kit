@@ -90,22 +90,23 @@ def load_llm_params(api_list, model_list, lora_list, *args):
             params['api_key'] = args[0]
             params['port'] = args[1]
             params['api_base'] = args[2]
+            params['api_model'] = args[3]
         elif api_list == 'azure openai':
             params['name'] = 'azure openai'
-            params['api_key'] = args[3]
-            params['endpoint'] = args[4]
-            params['engine'] = args[5]
+            params['api_key'] = args[4]
+            params['endpoint'] = args[5]
+            params['engine'] = args[6]
         else:
             pass
         return chat_api.set_llm(params)
     elif model_list is not None:
         params['name'] = model_list
         params['lora'] = lora_list
-        params['quantization'] = args[6]
-        params['max_length'] = args[7]
-        params['top_p'] = args[8]
-        params['temperature'] = args[9]
-        # params['use_deepspeed'] = args[10]
+        params['quantization'] = args[7]
+        params['max_length'] = args[8]
+        params['top_p'] = args[9]
+        params['temperature'] = args[10]
+        # params['use_deepspeed'] = args[11]
         return chat_api.set_llm(params)
     raise gr.Error('请选择API或模型')
 
@@ -135,11 +136,13 @@ def load_config_params(play,time_c,emoticon,user_name,net,search,search_key,resu
             params['name'] = 'openai'
             params['api_key'] = args[0]
             params['port'] = args[1]
+            params['api_base'] = args[2]
+            params['api_model'] = args[3]
         elif emb_api_list == 'azure openai':
             params['name'] = 'azure openai'
-            params['api_key'] = args[2]
-            params['endpoint'] = args[3]
-            params['engine'] = args[4]
+            params['api_key'] = args[4]
+            params['endpoint'] = args[5]
+            params['engine'] = args[6]
         else:
             pass
     elif emb_model_list is not None:
@@ -211,6 +214,8 @@ class Avtar():
                                 lines=1, value='', label="*VPN proxyPort:")
                             openai_api_base = gr.Textbox(
                                 lines=1, value='', label="API base:")
+                            openai_api_model = gr.Radio(
+                                ['gpt-3.5-turbo','gpt-4'], label=localizer("API模型"), value='gpt-3.5-turbo')
                         with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as azure_openai_params:
                             azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -255,6 +260,10 @@ class Avtar():
                                     lines=1, placeholder="Write Here...", label="openai_api_key:", type='password')
                                 embedding_openai_port = gr.Textbox(
                                     lines=1, value='', label="VPN proxyPort:")
+                                embedding_openai_api_base = gr.Textbox(
+                                    lines=1, value='', label=localizer("API base:"))
+                                embedding_openai_api_model = gr.Radio(
+                                        ['text-embedding-ada-002'], label=localizer("API模型"), value='text-embedding-ada-002')
                             with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as emb_azure_openai_params:
                                 embedding_azure_api_key = gr.Textbox(
                                     lines=1, placeholder="Write Here...", label="azure_api_key:", type='password')
@@ -276,8 +285,8 @@ class Avtar():
                     save1 = gr.Button(localizer("保存设定"),variant="primary")
                     emptyConfigBtn = gr.Button(localizer("清空设定"))
         
-        total_params = [openai_api_key, openai_port, openai_api_base, azure_api_key, azure_endpoint, azure_engine,quantization,max_length,top_p,temperature]
-        total_config_params = [embedding_openai_api_key, embedding_openai_port, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
+        total_params = [openai_api_key, openai_port, openai_api_base, openai_api_model, azure_api_key, azure_endpoint, azure_engine,quantization,max_length,top_p,temperature]
+        total_config_params = [embedding_openai_api_key, embedding_openai_port, embedding_openai_api_base, embedding_openai_api_model, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
 
         gen_type.change(handle_online_tts,inputs=gen_type,outputs= lang)
         Refresh.click(refresh_file, outputs=[play,memory,background,emb_model_list,model_list,lora_list])
