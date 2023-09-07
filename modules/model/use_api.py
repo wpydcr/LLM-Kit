@@ -773,22 +773,26 @@ class openai_api():
     def __init__(self):
         self.history = ChatMessageHistory()
 
-    def get_embedding(self, openai_api_key, port, type='openai', endpoint='', engine=''):
+    def get_embedding(self, openai_api_key, port='', api_base='', api_model='text-embedding-ada-002', type='openai', endpoint='', engine=''):
         if type == 'openai':
             openai.api_type = "open_ai"
-            if port != None:
+            if api_base != '':
+                openai.api_base = api_base
+            else:
+                openai.api_base = 'https://api.openai.com/v1'
+            if port != '':
                 os.environ['http_proxy'] = 'http://127.0.0.1:' + port
                 os.environ["https_proxy"] = "http://127.0.0.1:" + port
-            self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key)
+            self.embedding = OpenAIEmbeddings(openai_api_key=openai_api_key, model=api_model)
         elif type == 'azure':
             os.environ['OPENAI_API_BASE'] = endpoint
             os.environ['OPENAI_API_KEY'] = openai_api_key
             os.environ['OPENAI_API_TYPE'] = 'azure'
             # 暂未支持
             self.embedding = OpenAIEmbeddings(
-                openai_api_key=openai_api_key, deployment=engine)
+                openai_api_key=openai_api_key, deployment=engine, model=api_model)
 
-    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=4096, top_p=0.7, openai_prompt='', port=10809, model="gpt-4", type='openai', endpoint='', engine=""):
+    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=4096, top_p=0.7, openai_prompt='', port=10809, model="gpt-3.5-turbo", type='openai', endpoint='', engine=""):
         if openai_api_key == '':
             return {
                 'status': -1,

@@ -48,7 +48,7 @@ class local_doc_qa():
         """
         if params['name'] == 'openai':
             self.embeddings=openai_api()
-            self.embeddings.get_embedding(openai_api_key=params['api_key'],port=params['port'])
+            self.embeddings.get_embedding(openai_api_key=params['api_key'],port=params['port'], api_base=params['api_base'], api_model=params['api_model'])
         elif params['name'] == 'azure openai':
             self.embeddings=openai_api()
             self.embeddings.get_embedding(openai_api_key=params['api_key'],port=params['port'],type='azure',endpoint=params['endpoint'],engine=params['engine'])
@@ -118,13 +118,15 @@ class local_doc_qa():
             docs = loader.load_and_split(text_splitter=textsplitter)
         return docs
 
-    def upload_data(self,emb_api_list,emb_model_list,files,vs_name,openai_api_key,openai_port,azure_api_key,azure_endpoint,azure_engine):
+    def upload_data(self,emb_api_list,emb_model_list,files,vs_name,openai_api_key,openai_port,openai_api_base, openai_api_model, azure_api_key,azure_endpoint,azure_engine):
         if emb_api_list is not None:
             if emb_api_list == 'openai':
                 params = {
                     'name': emb_api_list,
                     'api_key': openai_api_key,
-                    'port': openai_port
+                    'port': openai_port,
+                    'api_base':openai_api_base,
+                    'api_model':openai_api_model
                 }
             elif emb_api_list == 'azure openai':
                 params = {
@@ -165,7 +167,7 @@ class local_doc_qa():
             return loaded_files+"文件均未成功加载，请检查依赖包或替换为其他文件再次上传。"
 
 
-    def handle_database_selected(self,create_emb_api_list,create_emb_model_list,docs,create_openai_api_key,create_openai_port,create_azure_api_key,create_azure_endpoint,create_azure_engine):
+    def handle_database_selected(self,create_emb_api_list,create_emb_model_list,docs,create_openai_api_key,create_openai_port,create_openai_api_base, create_openai_api_model, create_azure_api_key,create_azure_endpoint,create_azure_engine):
         """Handles the selection of a vector database on the webui data page. Load the selected embedded model and return
             the files in the database.
 
@@ -185,7 +187,9 @@ class local_doc_qa():
                 params = {
                     'name': create_emb_api_list,
                     'api_key': create_openai_api_key,
-                    'port': create_openai_port
+                    'port': create_openai_port,
+                    'api_base':create_openai_api_base,
+                    'api_model':create_openai_api_model
                 }
             elif create_emb_model_list == 'azure openai':
                 params = {

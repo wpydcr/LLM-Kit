@@ -6,6 +6,7 @@
   "刷新": "Refresh",
   "API base:":"API base:",
   "选择模型": "Choose Model",
+  "API模型":"API Model",
   "API列表": "API List",
   "openai参数": "OpenAI Parameters",
   "azure openai参数": "Azure Openai Parameters",

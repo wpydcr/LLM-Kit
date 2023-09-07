@@ -58,13 +58,15 @@ def load_emb_val_params(api_list,model_list,*args):
     if 'openai' in api_list:
         params['openai'] = {
             'api_key':args[0],
-            'port':args[1]
+            'port':args[1],
+            'api_base':args[2],
+            'api_model':args[3],
         }
     if 'azure openai' in api_list:
         params['azure openai'] = {
-            'api_key':args[2],
-            'endpoint':args[3],
-            'engine':args[4]
+            'api_key':args[4],
+            'endpoint':args[5],
+            'engine':args[6]
         }
     
     return embedding_vis.plot(api_list,model_list,params)
@@ -219,6 +221,10 @@ def train_page(localizer):
                         lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                     openai_port = gr.Textbox(
                         lines=1, value='', label="*VPN proxyPort:")
+                    openai_api_base = gr.Textbox(
+                            lines=1, value='', label=localizer("API base:"))
+                    openai_api_model = gr.Radio(
+                            ['text-embedding-ada-002'], label=localizer("API模型"), value='text-embedding-ada-002')
                 with gr.Accordion(localizer("azure openai参数"), open=False, visible=False) as emb_val_azure_openai_params:
                     azure_api_key = gr.Textbox(
                         lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -271,7 +277,7 @@ def train_page(localizer):
     embed_start.click(embedding_train.start_train,[embed_emb0,embed_arch,embed_data1,embed_device1,embed_batch_size,embed_max_steps,embed_save_steps,embed_learning_rate,embed_logging_epochs,embed_save_dir,embed_epochs,embed_weight_decay,embed_warmup_ratio,embed_eps,embed_gradient_accumulation_steps],[embed_out],show_progress=True)
     embed_stop.click(embedding_train.stop_train,[],[],show_progress=True)
 
-    total_params = [openai_api_key,openai_port,azure_api_key,azure_endpoint,azure_engine]
+    total_params = [openai_api_key,openai_port,openai_api_base, openai_api_model, azure_api_key,azure_endpoint,azure_engine]
 
     Refresh.click(embedding_vis.refresh_directories, outputs=[model_list])
     upload4.upload(embedding_vis.upload_data, inputs=[upload4],outputs=text,show_progress=True)

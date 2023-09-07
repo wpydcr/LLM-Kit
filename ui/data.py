@@ -164,6 +164,10 @@ def data_page(localizer):
                             lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                         openai_port = gr.Textbox(
                             lines=1, value='', label="*VPN proxyPort:")
+                        openai_api_base = gr.Textbox(
+                            lines=1, value='', label=localizer("API base:"))
+                        openai_api_model = gr.Radio(
+                                ['text-embedding-ada-002'], label=localizer("API模型"), value='text-embedding-ada-002')
                     with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as azure_openai_params:
                         azure_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -187,6 +191,10 @@ def data_page(localizer):
                             lines=1, placeholder="Write Here...", label="*openai_api_key:", type='password')
                         create_openai_port = gr.Textbox(
                             lines=1, value='', label="*VPN proxyPort:")
+                        create_openai_api_base = gr.Textbox(
+                            lines=1, value='', label=localizer("API base:"))
+                        create_openai_api_model = gr.Radio(
+                                ['text-embedding-ada-002'], label=localizer("API模型"), value='text-embedding-ada-002')
                     with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as create_azure_openai_params:
                         create_azure_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -221,7 +229,7 @@ def data_page(localizer):
         # with gr.Tab("other"):
         #     pass
     
-    create_emb_total_params = [create_openai_api_key,create_openai_port,create_azure_api_key,create_azure_endpoint,create_azure_engine]
+    create_emb_total_params = [create_openai_api_key,create_openai_port,create_openai_api_base, create_openai_api_model, create_azure_api_key,create_azure_endpoint,create_azure_engine]
     search_button.click(doc_qa.handle_database_selected, inputs=[create_emb_api_list,create_emb_model_list,doc0]+create_emb_total_params,outputs= file_in_doc)
     delete_selected_file.click(doc_qa.handle_vector_database_file_delete, inputs=[file_in_doc,doc0],outputs=file_in_doc)
     add_button.click(doc_qa.handle_add_file_to_vector_database, inputs=[add_new_file,doc0],outputs=file_in_doc)
@@ -249,7 +257,7 @@ def data_page(localizer):
     start3.click(data_pro.start_openai_doc, [openai_api_key3,temperature3,max_tokens3,top_p3,openai_prompt3,port1,timesleep3],[json_d3,org_json_d3])
     stop3.click(data_pro.stop_openai_doc, [],[json_d3,org_json_d3,doc3])
     
-    total_faiss_params = [files,vs_name,openai_api_key,openai_port,azure_api_key,azure_endpoint,azure_engine]
+    total_faiss_params = [files,vs_name,openai_api_key,openai_port, openai_api_base, openai_api_model, azure_api_key,azure_endpoint,azure_engine]
     upload1.upload(data_pro.upload_data_out, [upload1,question2,answer2,models2,models3],  outputs=[out],show_progress=True)
     emptyBtn2.click(data_pro.reset_upload_out, [],[out])
     download21.click(data_pro.dl_jsonl2, [download_path2,split_data21],[llm_exchange_upload_ok],show_progress=True)
