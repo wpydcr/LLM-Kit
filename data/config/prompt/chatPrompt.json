@@ -1,0 +1,30 @@
+[{"name": "写作助理",
+"category":"常用",
+"explain":"最常使用的 prompt，用于优化文本的语法、清晰度和简洁度，提高可读性。",
+"englishPrompt":"As a writing improvement assistant, your task is to improve the spelling, grammar, clarity, concision, and overall readability of the text provided, while breaking down long sentences, reducing repetition, and providing suggestions for improvement. Please provide only the corrected Chinese version of the text and avoid including explanations. Please begin by editing the following text: [文章内容]",
+"chinesePrompt":"作为一名中文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，同时分解长句，减少重复，并提供改进建议。请只提供文本的更正版本，避免包括解释。请从编辑以下文本开始："
+},
+{"name": "小红书风格",
+"category":"常用",
+"explain":"将文本改写成类似小红书的 Emoji 风格。",
+"englishPrompt":"Please edit the following passage using the Emoji style, which is characterized by captivating headlines, the inclusion of emoticons in each paragraph, and the addition of relevant tags at the end. Be sure to maintain the original meaning of the text. Please begin by editing the following text: [小红书内容]",
+"chinesePrompt":"请使用 Emoji 风格编辑以下段落，该风格以引人入胜的标题、每个段落中包含表情符号和在末尾添加相关标签为特点。请确保保持原文的意思。"
+},
+{"name": "Nature 风格润色",
+"category":"写作",
+"explain":"将按照 Nature 风格润色，或者可以提供想要模仿的写作风格。",
+"englishPrompt":"I want you to act as an professional spelling and grammer corrector and improver. I want you to replace my simplified A0-level words and sentences with more beautiful and elegant, upper level English words and sentences. Keep the meaning same, but make them more literary and improve my expression in the style of the journal Nature.",
+"chinesePrompt":"我希望你能充当专业的拼写和语法校对者，并改进我的文章。我想让你用更美丽、优雅、高级的英语单词和句子替换我的简化 A0 级别的单词和句子，保持意思不变，但使它们更具文学性，在《自然》杂志风格中提高我的表达水平。"
+},
+{"name": "论文式回答",
+"category":"常用",
+"explain":"以论文形式讨论问题，能够获得连贯的、结构化的和更高质量的回答。",
+"englishPrompt":"Write a highly detailed essay in Chinese with introduction, body, and conclusion paragraphs responding to the following: [问题]",
+"chinesePrompt":"写一篇高度详细的文章，包括引言、主体和结论段落，以回应以下内容："
+},
+{"name": "英语翻译或修改 ",
+"category":"常用",
+"explain":"将其他语言翻译成英文，或改进你提供的英文句子。",
+"englishPrompt":"I want you to act as an English translator, spelling corrector and improver. I will speak to you in any language and you will detect the language, translate it and answer in the corrected and improved version of my text, in English. I want you to replace my simplified A0-level words and sentences with more beautiful and elegant, upper level English words and sentences. Keep the meaning same, but make them more literary. I want you to only reply the correction, the improvements and nothing else, do not write explanations. My first sentence is [要翻译的语言]",
+"chinesePrompt":"我希望你能充当英语翻译、拼写纠正者和改进者。我将用任何语言与你交谈，你将检测语言，翻译它，并在我的文本的更正和改进版本中用英语回答。我希望你用更漂亮、更优雅、更高级的英语单词和句子来取代我的简化 A0 级单词和句子。保持意思不变，但让它们更有文学性。我希望你只回答更正，改进，而不是其他，不要写解释。我的第一句话是 [要翻译的语言]"
+}]

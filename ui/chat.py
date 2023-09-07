@@ -2,7 +2,7 @@ import gradio as gr
 import os
 from utils.ui_utils import chat_base_model
 from utils.parallel_api import Parallel_api, ParallelLocalModel
-
+import json
 
 def get_directories(path, unuse):
     return [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d)) and d not in unuse]
@@ -18,6 +18,14 @@ embs = get_directories(new_path, [])
 new_path = os.path.join(real_path, "..", "data", "documents")
 docs = get_directories(new_path, [])
 
+# 提示词
+new_path = os.path.join(real_path, "..", "data", "config","prompt")
+category=[]
+load_chatPrompt = json.load(open(new_path+"\chatPrompt.json", 'r', encoding='utf-8'))
+for d in load_chatPrompt:
+    if d["category"] not in category:
+        category.append(d["category"])
+
 chat_model = chat_base_model()
 parallel_api = Parallel_api()
 
@@ -26,6 +34,29 @@ model_api = ['openai', 'azure openai', 'ernie bot',
 
 embedding_api = ['openai', 'azure openai']
 parallel_local_model = ParallelLocalModel()
+
+# 提示词
+def refresh_prompt(choose_category,language):
+    if language is None:
+        raise gr.Error('请选择语言')
+    res=[]
+    if language=="chinese":
+        for k in load_chatPrompt:
+            if k["category"] in choose_category:
+                ttt=[]
+                ttt.append(k["name"])
+                ttt.append("👉"+k["explain"])
+                ttt.append(k["chinesePrompt"])
+                res.append(ttt)
+    if language=="english":
+        for k in load_chatPrompt:
+            if k["category"] in choose_category:
+                ttt=[]
+                ttt.append(k["name"])
+                ttt.append("👉"+k["explain"])
+                ttt.append(k["englishPrompt"])
+                res.append(ttt)
+    return gr.update(value=res)
 
 def refresh_directories():
     new_path = os.path.join(real_path, "..", "models", "LLM")
@@ -441,6 +472,20 @@ def chat_page(localizer):
                         lines=1, placeholder="Write Here...", label=localizer("*联网key:"), type='password')
                     result_len = gr.Slider(
                         1, 20, value=3, step=1, label=localizer("搜索条数:"), interactive=True)
+    
+    with  gr.Tab(localizer('提示词')):
+        with gr.Row():
+            with gr.Column(scale=4):
+                choose_category = gr.CheckboxGroup(category, label="标签选择", value=category)
+            with gr.Column(scale=1):
+                language = gr.Radio(["chinese","english"], label="语言选择", value="chinese")
+        with gr.Row():
+            save1 = gr.Button(localizer("加载"), variant="primary")
+        with gr.Row():
+            dialog = gr.List(value=None, headers=[ '应用场景', '解释', '提示词'], col_count=(3, 'fixed'), show_label=False, wrap=True, label='提示词参考')
+
+    
+    
     with gr.Tab(localizer("API并行调用")):
         with gr.Row():
             with gr.Column(scale=4):
@@ -686,6 +731,8 @@ def chat_page(localizer):
                     parallel_local_model_result_len = gr.Slider(
                         1, 20, value=3, step=1, label=localizer("搜索条数:"), interactive=True)
 
+    save1.click(refresh_prompt,inputs=[choose_category,language], outputs=[dialog])
+    
     dual_local.select(ParallelLocalModel.handle_local_model_selected, outputs=[local_chatbot1, local_chatbot2])
     embedding_total_params = [embedding_openai_api_key, embedding_openai_port, embedding_openai_api_base, embedding_openai_api_model, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
 
