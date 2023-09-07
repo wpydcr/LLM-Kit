@@ -776,7 +776,6 @@ class openai_api():
     def get_embedding(self, openai_api_key, port, type='openai', endpoint='', engine=''):
         if type == 'openai':
             openai.api_type = "open_ai"
-            openai.api_base
             if port != None:
                 os.environ['http_proxy'] = 'http://127.0.0.1:' + port
                 os.environ["https_proxy"] = "http://127.0.0.1:" + port
@@ -789,7 +788,7 @@ class openai_api():
             self.embedding = OpenAIEmbeddings(
                 openai_api_key=openai_api_key, deployment=engine)
 
-    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=4096, top_p=0.7, openai_prompt='', port=10809, model="gpt-3.5-turbo", type='openai', endpoint='', engine=""):
+    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=4096, top_p=0.7, openai_prompt='', port=10809, model="gpt-4", type='openai', endpoint='', engine=""):
         if openai_api_key == '':
             return {
                 'status': -1,
@@ -799,12 +798,14 @@ class openai_api():
             openai.api_type = "open_ai"
             if api_base != '':
                 openai.api_base = api_base
+            else:
+                openai.api_base = 'https://api.openai.com/v1'
             # if port == '':
             #     return {
             #         'status': -1,
             #         'message': '请输入openai代理端口'
             #     }
-            if port != None:
+            if port != '':
                 os.environ['http_proxy'] = 'http://127.0.0.1:'+port
                 os.environ["https_proxy"] = "http://127.0.0.1:"+port
         elif type == 'azure':
@@ -874,8 +875,11 @@ class openai_api():
             text = p_generator.generate_openai_prompt(
                 message=text, system_message=self.charactor_prompt.content)
         messages = text
-        if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
-            return '字数超限'
+        try:
+            if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
+                return '字数超限'
+        except Exception as e:
+            pass
         try:
             response = self.llm_nonstream(messages)
             # print(response.content)
@@ -895,11 +899,16 @@ class openai_api():
             text = p_generator.generate_openai_prompt(
                 message=text, system_message=self.charactor_prompt.content)
         messages = text
-        if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
-            return '字数超限'
+        try:
+            if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
+                return '字数超限'
+        except Exception as e:
+            pass
         try:
             for response in self.llm(messages):
                 # print(response[1])
+                if len(response) == 0 or type(response[1]) == dict:
+                    break
                 yield {
                     'status': 0,
                     'message': response[1]
@@ -932,10 +941,13 @@ class openai_api():
         try:
             if self.llm.get_num_tokens_from_messages(messages) >= self.max_token-500:
                 self.cut_memory()
-            if stream:
-                total_reply = ''
+        except Exception as e:
+            pass
+        if stream:
+            total_reply = ''
+            try:
                 for response in self.llm(messages):
-                    if len(response) == 0:
+                    if len(response) == 0 or type(response[1]) == dict:
                         break
                     total_reply += response[1]
                     yield {
@@ -944,7 +956,13 @@ class openai_api():
                     }
                 self.history.messages.append(HumanMessage(content=message))
                 self.history.messages.append(AIMessage(content=total_reply))
-            else:
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
+        else:
+            try:
                 response = self.llm_nonstream(messages).content
                 self.history.messages.append(HumanMessage(content=message))
                 self.history.messages.append(AIMessage(content=response))
@@ -952,11 +970,11 @@ class openai_api():
                     'status': 0,
                     'message': response
                 }
-        except Exception as e:
-            yield {
-                'status': -1,
-                'message': str(e)
-            }
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
 
     def clear_history(self):
         self.history = ChatMessageHistory()
