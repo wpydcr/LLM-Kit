@@ -355,8 +355,8 @@ def chat_page(localizer):
                                 lines=1, value='', label="VPN proxyPort:")
                             openai_api_base = gr.Textbox(
                                 lines=1, value='', label=localizer("API base:"))
-                            openai_api_model = gr.Radio(
-                                ['gpt-3.5-turbo','gpt-4'], label=localizer("API模型"), value='gpt-3.5-turbo')
+                            openai_api_model = gr.Textbox(
+                            lines=1,label=localizer("API模型"), value='gpt-3.5-turbo')
                         with gr.Accordion(localizer("azure openai参数"), open=True, visible=False) as azure_openai_params:
                             azure_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')
@@ -496,8 +496,8 @@ def chat_page(localizer):
                             lines=1, value='', label="VPN proxyPort:")
                         api_openai_api_base = gr.Textbox(
                             lines=1, value='', label=localizer("API base:"))
-                        api_openai_api_model = gr.Radio(
-                                ['gpt-3.5-turbo','gpt-4'], label=localizer("API模型"), value='gpt-3.5-turbo')
+                        api_openai_api_model = gr.Textbox(
+                            lines=1,label=localizer("API模型"), value='gpt-3.5-turbo')
                     with gr.Accordion(localizer("azure openai参数"), open=False, visible=False) as api_azure_openai_params:
                         api_azure_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*azure_api_key:", type='password')

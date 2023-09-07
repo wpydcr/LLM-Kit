@@ -792,7 +792,7 @@ class openai_api():
             self.embedding = OpenAIEmbeddings(
                 openai_api_key=openai_api_key, deployment=engine, model=api_model)
 
-    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=4096, top_p=0.7, openai_prompt='', port=10809, model="gpt-3.5-turbo", type='openai', endpoint='', engine=""):
+    def setv(self, openai_api_key='', api_base='', temperature=0.95, max_tokens=None, top_p=0.7, openai_prompt='', port=10809, model="gpt-3.5-turbo", type='openai', endpoint='', engine=""):
         if openai_api_key == '':
             return {
                 'status': -1,
@@ -825,7 +825,7 @@ class openai_api():
                 }
         self.charactor_prompt = SystemMessage(content=openai_prompt)
         self.max_token = max_tokens
-        if max_tokens == 0:
+        if max_tokens == 0 or max_tokens == None:
             max_tokens = None
             self.max_token = 4096
         if type == 'openai':
@@ -853,7 +853,7 @@ class openai_api():
                 streaming=True,
                 temperature=temperature,
                 top_p=top_p,
-                max_tokens=self.max_token)
+                max_tokens=max_tokens)
             self.llm_nonstream = AzureChatOpenAI(
                 openai_api_key=openai_api_key,
                 openai_api_base=endpoint,
@@ -864,7 +864,7 @@ class openai_api():
                 streaming=False,
                 temperature=temperature,
                 top_p=top_p,
-                max_tokens=self.max_token)
+                max_tokens=max_tokens)
             # 暂未支持
             self.embedding = OpenAIEmbeddings(
                 openai_api_key=openai_api_key, deployment=engine)
