@@ -271,7 +271,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
         else:
             config.fp16 = False
             config.bf16 = False
-            config.fp32 = False
+            config.fp32 = True
         if use_4bit or use_8bit:
             config.update({"use_flash_attn": False})
         if max_length > config.max_position_embeddings:
