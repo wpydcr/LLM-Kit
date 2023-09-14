@@ -111,7 +111,7 @@ def parse_args():
         "--model_name",
         type=str,
         default=args_to_load["model name"],
-        choices=["chatglm-6b", "moss-moon-003-sft", "phoenix-inst-chat-7b", "Guanaco", "baichuan-vicuna-chinese-7b", "chatglm2-6b", "Baichuan-13B-Chat", "internlm-chat-7b-8k"], 
+        choices=["chatglm-6b", "moss-moon-003-sft", "phoenix-inst-chat-7b", "Guanaco", "baichuan-vicuna-chinese-7b", "chatglm2-6b", "Baichuan-13B-Chat", "Baichuan2-13B-Chat", "Baichuan2-7B-Chat", "internlm-chat-7b-8k"], 
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
@@ -289,7 +289,7 @@ def main():
 
     # model, tokenizer = get_model_tokenizer(args.model_path, use_8bit=args.use_8bit, max_length=args.max_length, use_deepspeed=accelerator.state.deepspeed_plugin is not None) Should this be loaded from config?
     if not os.path.exists(os.path.join(real_path,'..','..','..','flag.txt')):
-        model, tokenizer = get_model_tokenizer(args.model_path, use_8bit=args.use_8bit, use_4bit=args.use_4bit, max_length=args.max_length, use_deepspeed=accelerator.state.deepspeed_plugin is not None)
+        model, tokenizer = get_model_tokenizer(args.model_path, use_8bit=args.use_8bit, use_4bit=args.use_4bit, max_length=args.max_length, use_deepspeed=accelerator.state.deepspeed_plugin is not None, dtype=accelerator.state.mixed_precision)
     else:
         print('load model stop')
         return

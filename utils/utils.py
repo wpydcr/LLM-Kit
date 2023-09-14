@@ -12,6 +12,11 @@ import shutil
 import os
 import re
 from peft import get_peft_model, LoraConfig, TaskType, PeftModel
+try:
+    from xformers import ops as xops
+    pad_to_multiple_of_8 = True
+except:
+    pad_to_multiple_of_8 = False
 
 real_path = os.path.split(os.path.realpath(__file__))[0]
 
@@ -54,12 +59,16 @@ def copy_custom_files(source, target):
         shutil.copy(os.path.join(source, "configuration_moss.py"), target)
         shutil.copy(os.path.join(source, "modeling_moss.py"), target)
         shutil.copy(os.path.join(source, "tokenization_moss.py"), target)
-    elif "Baichuan-13B-Chat" == model_name:
+    elif (
+        "Baichuan-13B-Chat" == model_name or
+        "Baichuan2-13B-Chat" == model_name or
+        "Baichuan2-7B-Chat" == model_name
+        ):
         shutil.copy(os.path.join(source, "configuration_baichuan.py"), target)
         shutil.copy(os.path.join(source, "modeling_baichuan.py"), target)
         shutil.copy(os.path.join(source, "quantizer.py"), target)
         shutil.copy(os.path.join(source, "tokenization_baichuan.py"), target)
-        shutil.copy(os.path.join(path, "handler.py"), target)
+        shutil.copy(os.path.join(source, "generation_utils.py"), target)
     elif "internlm-chat-7b-8k" == model_name:
         shutil.copy(os.path.join(source, "configuration_internlm.py"), target)
         shutil.copy(os.path.join(source, "modeling_internlm.py"), target)
@@ -72,7 +81,13 @@ def copy_custom_files(source, target):
     else:
         raise NotImplementedError("Model is not implemented.")
 
-def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, use_deepspeed=False, device_map=None):
+def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, use_deepspeed=False, device_map=None, dtype='fp16'):
+    if dtype == 'fp16':
+        data_type = torch.float16
+    elif dtype == 'bf16':
+        data_type = torch.bfloat16
+    else:
+        data_type = torch.float32
     model_name = get_model_name(path)
     new_path = os.path.join(real_path, "..", "models", "LLM")
     original_path = os.getcwd()
@@ -90,7 +105,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_4bit=True,
             llm_int8_threshold=6.0,
             llm_int8_has_fp16_weight=False,
-            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_compute_dtype=data_type,
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type="nf4",
         )
@@ -106,7 +121,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             # empty_init=False,
             load_in_8bit=use_8bit,
             device_map=device_map,
-            torch_dtype=torch.float16)
+            torch_dtype=data_type)
     elif "chatglm-6b" == model_name:
         config = AutoConfig.from_pretrained(path, trust_remote_code=True, cache_dir='./')
         if max_length > config.max_sequence_length:
@@ -120,7 +135,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config, 
-            torch_dtype=torch.float16)
+            torch_dtype=data_type)
     elif "chatglm2-6b" == model_name or "chatglm2-6b-32k" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir='./', trust_remote_code=True)
         if max_length > config.seq_length:
@@ -134,7 +149,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config, 
-            torch_dtype=torch.float16)
+            torch_dtype=data_type)
     elif "phoenix-inst-chat-7b" == model_name or "phoenix-inst-chat-7b-v1.1" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir='./')
         if max_length > config.seq_length:
@@ -145,7 +160,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config,  
-            torch_dtype=torch.float16)
+            torch_dtype=data_type)
     elif "moss-moon-003-sft" == model_name:
         config = AutoConfig.from_pretrained(path, trust_remote_code=True, cache_dir='./')
         if max_length > config.n_positions:
@@ -159,7 +174,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit, 
             device_map=device_map,
             quantization_config=quantization_config, 
-            torch_dtype=torch.float16)
+            torch_dtype=data_type)
         # moss没有用到pad_token，为与其他模型保持一致，进行额外增加
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -175,7 +190,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config,  
-            torch_dtype=torch.float16,
+            torch_dtype=data_type,
             )
     elif "baichuan-vicuna-chinese-7b" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir='./')
@@ -189,10 +204,14 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit, 
             device_map=device_map,
             quantization_config=quantization_config, 
-            torch_dtype=torch.float16,
+            torch_dtype=data_type,
         )
         tokenizer.pad_token_id = model.config.pad_token_id
-    elif "Baichuan-13B-Chat" == model_name:
+    elif (
+        "Baichuan-13B-Chat" == model_name or 
+        "Baichuan2-13B-Chat" == model_name or
+        "Baichuan2-7B-Chat" == model_name
+    ):
         config = AutoConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
         if max_length > config.model_max_length:
             config.update({"model_max_length": max_length})
@@ -205,7 +224,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config,  
-            torch_dtype=torch.float16,
+            torch_dtype=data_type,
             )
         model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
         tokenizer.user_token_id = model.generation_config.user_token_id
@@ -225,7 +244,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config,  
-            torch_dtype=torch.float16,
+            torch_dtype=data_type,
             )
     elif "chinese-alpaca-2-7b" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir="./")
@@ -237,11 +256,22 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             load_in_8bit=use_8bit,
             device_map=device_map,
             quantization_config=quantization_config,  
-            torch_dtype=torch.float16,
+            torch_dtype=data_type,
             )
     elif "Qwen-7B-Chat" == model_name:
         config = AutoConfig.from_pretrained(path, cache_dir="./", trust_remote_code=True)
-        config.fp16 = True
+        if dtype == 'fp16':
+            config.fp16 = True
+            config.bf16 = False
+            config.fp32 = False
+        elif dtype == 'bf16':
+            config.fp16 = False
+            config.bf16 = True
+            config.fp32 = False
+        else:
+            config.fp16 = False
+            config.bf16 = False
+            config.fp32 = False
         if use_4bit or use_8bit:
             config.update({"use_flash_attn": False})
         if max_length > config.max_position_embeddings:
@@ -252,7 +282,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
         )
         model = AutoModelForCausalLM.from_pretrained(
             path, config=config, device_map=device_map, load_in_8bit=use_8bit, 
-            cache_dir="./", torch_dtype=torch.float16, trust_remote_code=True,
+            cache_dir="./", torch_dtype=data_type, trust_remote_code=True,
             quantization_config=quantization_config,
         )
         model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=True, cache_dir="./")
@@ -275,7 +305,11 @@ def get_lora_model(model, path, lora_rank, checkpoint):
         target_modules = None
     elif "moss-moon-003-sft" == model_name:
         target_modules = ["qkv_proj"]
-    elif "Baichuan-13B-Chat" == model_name:
+    elif (
+        "Baichuan-13B-Chat" == model_name or
+        "Baichuan2-13B-Chat" == model_name or
+        "Baichuan2-7B-Chat" == model_name
+    ):
         target_modules = ["W_pack"]
     elif "internlm-chat-7b-8k" == model_name:
         target_modules = ["q_proj", "k_proj"]
@@ -315,7 +349,11 @@ def get_preprocess_datacollator(path):
         return preprocess_4_gunaco, data_collator_4_guanaco
     elif "baichuan-vicuna-chinese-7b" == model_name:
         return preprocess_4_baichuan, data_collator_4_baichuan
-    elif "Baichuan-13B-Chat" == model_name:
+    elif (
+        "Baichuan-13B-Chat" == model_name or
+        "Baichuan2-13B-Chat" == model_name or
+        "Baichuan2-7B-Chat" == model_name
+    ):
         return preprocess_4_baichuan_13b_chat, data_collator_4_baichuan_13b_chat
     elif "internlm-chat-7b-8k" == model_name:
         return preprocess_4_internlm, data_collator_4_internlm
@@ -367,7 +405,11 @@ def build_query(path, tokenizer, question, history):
         for q, a in history:
             query += "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n{}<|im_end|>\n".format(q, a)
         query += "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n".format(question)
-    elif "Baichuan-13B-Chat" == model_name:
+    elif (
+        "Baichuan-13B-Chat" == model_name or
+        "Baichuan2-13B-Chat" == model_name or
+        "Baichuan2-7B-Chat" == model_name
+    ):
         for q, a in history:
             query += tokenizer.user_token + q + tokenizer.assistant_token + a + tokenizer.eos_token
         query += tokenizer.user_token + question + tokenizer.assistant_token
@@ -405,7 +447,7 @@ def preprocess_4_phoenix(example, tokenizer, max_length):
 
 def data_collator_4_phoenix(features, tokenizer):
     len_ids = [len(feature["input_ids"]) for feature in features]
-    longest = max(len_ids)
+    longest = (max(len_ids) + 7) // 8 * 8 if pad_to_multiple_of_8 else max(len_ids)
     input_ids = []
     attention_mask = []
     labels_list = []
@@ -442,7 +484,7 @@ def preprocess_4_chatglm(example, tokenizer, max_length):
 
 def data_collator_4_chatglm(features, tokenizer):
     len_ids = [len(feature["input_ids"]) for feature in features]
-    longest = max(len_ids)
+    longest = (max(len_ids) + 7) // 8 * 8 if pad_to_multiple_of_8 else max(len_ids)
     input_ids = []
     labels_list = []
     for ids_l, feature in zip(len_ids, features):
@@ -509,7 +551,7 @@ def preprocess_4_chatglm2(example, tokenizer, max_length):
 
 def data_collator_4_chatglm2(features, tokenizer):
     len_ids = [len(feature["input_ids"]) for feature in features]
-    longest = max(len_ids)
+    longest = (max(len_ids) + 7) // 8 * 8 if pad_to_multiple_of_8 else max(len_ids)
     input_ids = []
     labels_list = []
     pos_list = []

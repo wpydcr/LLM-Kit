@@ -1,4 +1,4 @@
-accelerate
+accelerate==0.20.3
 cpm_kernels==1.0.11
 datasets==2.8.0
 gradio==3.35.2
@@ -9,7 +9,7 @@ modelscope==1.6.1
 numpy==1.22.0
 openTSNE==0.7.1
 pandas==1.5.3
-peft==0.3.0
+peft==0.4.0
 plotly==5.14.1
 python_dateutil==2.8.2
 python_docx==0.8.11
@@ -22,7 +22,7 @@ sentencepiece==0.1.97
 tensorflow==2.12.0
 torch==2.0.1
 tqdm==4.65.0
-transformers==4.29.1
+transformers==4.33.1
 Cpython
 #pyopenjtalk
 librosa

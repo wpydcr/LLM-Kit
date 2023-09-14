@@ -159,6 +159,7 @@ class AutoLM(LLM):
                    use_8bit=False,
                    use_4bit=False,
                    device_map: Union[Optional[Dict[str, int]], str] = 'auto',
+                   dtype='fp16',
                    **kwargs):
         self.max_token = max_length
         self.temperature = temperature
@@ -173,7 +174,7 @@ class AutoLM(LLM):
         original_path = os.getcwd()
         os.chdir(new_path)
         self.model, self.tokenizer = get_model_tokenizer(
-            model_name, use_8bit=use_8bit, use_4bit=use_4bit, max_length=self.max_token, use_deepspeed=self.use_deepspeed, device_map=device_map)
+            model_name, use_8bit=use_8bit, use_4bit=use_4bit, max_length=self.max_token, use_deepspeed=self.use_deepspeed, device_map=device_map, dtype=dtype)
         os.chdir(original_path)
         if use_lora:
             try:
