@@ -93,6 +93,7 @@ $ pip install -r requirements.txt
   - [x] [智谱GLM](https://open.bigmodel.cn/usercenter/apikeys)
   - [x] [通义千问](https://help.aliyun.com/document_detail/2399480.html)
   - [x] [讯飞星火](https://console.xfyun.cn/services/cbm)
+  - [x] [claude](https://www.anthropic.com/index/claude-2)  
 - [ ] LLM 模型支持(训练/推理)
   - [x] [4bit与8bit量化（bitsandbytes仅支持linux）](https://github.com/TimDettmers/bitsandbytes)
   - [x] [使用内存替代部分显存（deepspeed训练仅支持linux，推理在windows需编译）](https://github.com/microsoft/DeepSpeed)
@@ -107,6 +108,7 @@ $ pip install -r requirements.txt
   - [x] [internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+  - [x] [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
 - [ ] 多模态大模型(推理)
   - [ ] qwen-vl
 - [x]  Finetune 支持
@@ -190,6 +192,9 @@ $ pip install -r requirements.txt
 
 ### [李璟辉](https://github.com/JaheimLee)
 负责大模型训练与推理的后端代码开发
+
+### [李禹含](https://github.com/liyuhan3035)
+负责提示词，嵌入模型验证和推理的后端代码开发
 
 ### [从灿](https://github.com/Alan-2018)
 负责嵌入模型训练的后端代码开发

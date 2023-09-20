@@ -95,6 +95,7 @@ $ pip install -r requirements.txt
   - [x] [智谱GLM](https://open.bigmodel.cn/usercenter/apikeys)
   - [x] [通义千问](https://help.aliyun.com/document_detail/2399480.html?spm=5176.28197632.0.0.5cea7e06Uj4ELL)
   - [x] [讯飞星火](https://console.xfyun.cn/services/cbm)
+  - [x] [claude](https://www.anthropic.com/index/claude-2)  
 - [ ] LLM support (train/inference)
   - [x] [4bit and 8bit（bitsandbytes only supports linux）](https://github.com/TimDettmers/bitsandbytes)
   - [x] [deepspeed（On Windows currently only inference mode is supported.）](https://github.com/microsoft/DeepSpeed)
@@ -109,6 +110,7 @@ $ pip install -r requirements.txt
   - [x] [internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+  - [x] [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
 - [ ] multimodal large model(inference)
   - [ ] qwen-vl
 - [x]  finetune Support
@@ -192,6 +194,9 @@ Responsible for python development for graph vector database, live2D, vits, svc,
 
 ### [李璟辉](https://github.com/JaheimLee)
 Responsible for back-end development of LLM training and inference
+
+### [李禹含](https://github.com/liyuhan3035)
+Responsible for prompt engineering, embedding model validation and inference back-end development.
 
 ### [从灿](https://github.com/Alan-2018) 
 Responsible for back-end development of embedded model training

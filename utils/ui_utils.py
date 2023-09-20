@@ -739,6 +739,8 @@ class chat_base_api():
             self.llm = spark_api()
         elif api_type == 'ali api':
             self.llm = ali_api()
+        elif api_type == 'claude':
+            self.llm = claude()
         else:
             pass
 
@@ -785,15 +787,21 @@ class chat_base_api():
         elif self.api_type == 'ali api':
             response = self.llm.setv(api_key=params['api_key'], top_p=params['top_p'],
                           top_k=params['top_k'], kuake_search=params['kuake_search'])
+        elif self.api_type == 'claude':
+            response = self.llm.setv(cookie=params['cookie'])
         else:
             pass
         if response['status'] == -1:
             raise gr.Error(response['message'])
 
-    def predict(self, input,stream=False):
-        for response in self.llm.talk(input,stream):
+    def predict(self, input, stream=False):
+        for response in self.llm.talk(input, stream):
             yield response
 
+    def predict_claude(self, input, filepath=[]):
+        for response in self.llm.talk(input, filepath):
+            yield response        
+        
     def reset_state(self):
         self.llm.clear_history()
         return [], ''
@@ -813,7 +821,7 @@ class chat_base_model():
     def clear(self):
         if self.model_name is None:
             return [], [], '', gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(visible=False)
-        elif self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api':
+        elif self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude':
             self.model_name = ''
             self.llm.reset_state()
             self.llm = AutoLM()
@@ -832,15 +840,28 @@ class chat_base_model():
             if self.llm.model_name != '':
                 self.llm.clear()
         return [], [], [], [],'', gr.update(value=None), gr.update(value=None),gr.update(visible=False)
-
-    def reset_state(self):
-        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api':
+    
+    def reset_state_claude(self,chatbot, history, user_input):
+        if self.model_name == 'claude':
+            return [], [], ''
+        else:
+            return chatbot, history, user_input
+    
+    def reset_state(self, *args):
+        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude':
             self.llm.reset_state()
+            if self.model_name == 'claude':
+                params = {}
+                params['name'] = 'claude'
+                params['cookie'] = args[35]
+                self.model_name = params.get('name')
+                self.llm = chat_base_api(self.model_name)
+                self.llm.set_v(params)
             return [], [], ''
         else:
             return [], [], ''
-    def reset_states(self):
 
+    def reset_states(self):
         return gr.update(value=[]),gr.update(value=[]),gr.update(value=[]),gr.update(value=[]),gr.update(value="")
 
     def load_api_params(self, params):
@@ -950,7 +971,7 @@ class chat_base_model():
                 doc_qa = doc
                 lo_doc, resp = doc_qa.get_similarity(input)
                 prompt = prompt + '\n' + lo_doc
-        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api':
+        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude':
             if self.model_name == 'openai' or self.model_name == 'azure openai':
                 self.llm.llm.charactor_prompt.content = prompt
             inputs = prompt+'\n'+input
