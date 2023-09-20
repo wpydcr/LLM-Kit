@@ -795,9 +795,6 @@ def chat_page(localizer):
     submitBtn.click(chat_model.predict, [user_input, chatbot, history, stream, net, search, search_key, result_len, prompt], [
                     chatbot, history, user_input], show_progress=True)
 
-    # emptyBtn.click(load_params,
-    #            outputs=[user_input, submitGroup], show_progress=True)    
-    
     emptyBtn.click(chat_model.reset_state, total_params, outputs=[chatbot, history, user_input])
 
     emptymodelBtn.click(chat_model.clear, outputs=[
