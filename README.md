@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # 安装依赖
 $ pip install -r requirements.txt
 ```
- 依赖也可以直接下载：[Windows环境包](https://pan.baidu.com/s/1i7t2nAnalrELgy9bUbyu2w?pwd=p5mb)， [Linux环境包](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
+ 依赖也可以直接下载：[Windows环境包](https://pan.baidu.com/s/1NVmXam5MGfSn3MkZlt0zQg?pwd=8ku6)， [Linux环境包](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
  
  [显卡驱动](https://www.nvidia.cn/Download/index.aspx?lang=cn)和[cuda](https://developer.nvidia.com/cuda-toolkit-archive)自行安装
 
@@ -129,6 +129,7 @@ $ pip install -r requirements.txt
   - [ ] 图像生成
     - [x] [Midjourney(VPN)](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2
+    - [ ] Pika
   - [ ] 数据集
     - [x] LLM训练数据集制作
     - [x] Embedding训练数据集制作
@@ -194,7 +195,7 @@ $ pip install -r requirements.txt
 ### [李璟辉](https://github.com/JaheimLee)
 负责大模型训练与推理的后端代码开发
 
-### [李禹含](https://github.com/liyuhan3035)
+### [李禹含 @灵境赛博](https://github.com/liyuhan3035)
 负责提示词，嵌入模型验证和推理的后端代码开发
 
 ### [从灿](https://github.com/Alan-2018)

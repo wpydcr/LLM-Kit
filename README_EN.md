@@ -33,7 +33,7 @@ $ cd LLM-Kit
 # install requirements
 $ pip install -r requirements.txt
 ```
- Or simply download：[Windows Env](https://pan.baidu.com/s/1i7t2nAnalrELgy9bUbyu2w?pwd=p5mb)， [Linux Env](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
+ Or simply download：[Windows Env](https://pan.baidu.com/s/1NVmXam5MGfSn3MkZlt0zQg?pwd=8ku6)， [Linux Env](https://pan.baidu.com/s/1exSZYLSx0OWP5NXNwtZsCw?pwd=fhn0)。
  
  [GPU Driver](https://www.nvidia.cn/Download/index.aspx?lang=cn) and [cuda](https://developer.nvidia.com/cuda-toolkit-archive) is also required and should be pre-installed.
 
@@ -131,6 +131,7 @@ $ pip install -r requirements.txt
   - [ ] Image Generation
     - [x] [Midjourney](https://github.com/CelestialRipple/Midjourney-Web-API)
     - [ ] GEN-2
+    - [ ] Pika
   - [ ] Dataset
     - [x] LLM Training dataset make
     - [x] Embedding Training dataset make
@@ -196,7 +197,7 @@ Responsible for python development for graph vector database, live2D, vits, svc,
 ### [李璟辉](https://github.com/JaheimLee)
 Responsible for back-end development of LLM training and inference
 
-### [李禹含](https://github.com/liyuhan3035)
+### [李禹含 @灵境赛博](https://github.com/liyuhan3035)
 Responsible for prompt engineering, embedding model validation and inference back-end development.
 
 ### [从灿](https://github.com/Alan-2018) 
