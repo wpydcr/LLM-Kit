@@ -30,7 +30,7 @@ chat_model = chat_base_model()
 parallel_api = Parallel_api()
 
 model_api = ['openai', 'azure openai', 'ernie bot',
-             'ernie bot turbo', 'chatglm api', 'spark api', 'ali api']
+             'ernie bot turbo', 'chatglm api', 'spark api', 'ali api', 'claude']
 
 embedding_api = ['openai', 'azure openai']
 parallel_local_model = ParallelLocalModel()
@@ -88,27 +88,33 @@ def api_page_clear():
 
 def api_select(api, model, lora):
     if api == None:
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=model), gr.update(value=lora)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=model), gr.update(value=lora)
     elif api == 'openai':
-        return gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'azure openai':
-        return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'ernie bot':
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'ernie bot turbo':
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'chatglm api':
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'spark api':
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'ali api':
-        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+    elif api == 'claude':
+        return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     else:
         pass
 
+def load_claude_params(api_list, model_list, lora_list,user_input, submitGroup, *args):
+    if api_list == 'claude':
+        return load_params(api_list, model_list, lora_list, args)
+    return user_input, submitGroup
 
 def load_params(api_list, model_list, lora_list, *args):
-    apis = ['openai','azure openai','ernie bot', 'ernie bot turbo','chatglm api','spark api','ali api']
+    apis = ['openai','azure openai','ernie bot', 'ernie bot turbo','chatglm api','spark api','ali api', 'claude']
     params = {}
     params['prompt'] = args[0]
     if api_list in apis:
@@ -155,6 +161,9 @@ def load_params(api_list, model_list, lora_list, *args):
             params['top_p'] = args[27]
             params['top_k'] = args[28]
             params['kuake_search'] = args[29]
+        elif api_list == 'claude':    
+            params['name'] = 'claude'
+            params['cookie'] = args[35]
         else:
             pass
         return chat_model.load_api_params(params)
@@ -442,6 +451,9 @@ def chat_page(localizer):
                             ali_top_k = gr.Slider(
                                 1, 100, value=100, step=1, label="Top k", interactive=True, elem_id='chat_ali_top_k')
                             ali_kuake_search = gr.Checkbox(label=localizer("联网搜索"))
+                        with gr.Accordion(localizer("claude参数"), open=True, visible=False) as claude_params:
+                            claude_cookies = gr.Textbox(
+                                lines=1, placeholder="Write Here...", label="*cookies:", type='password')
                     with gr.Tab(localizer("选择模型")):
                         model_list = gr.Radio(models, show_label=False, value=None)
                         # 量化方式(不支持Windows)
@@ -738,13 +750,13 @@ def chat_page(localizer):
 
     save0.click(parallel_local_model.load_embedding_params, [status,switch_chatbot,doc1, k, score_threshold, chunk_size, chunk_conent, emb_api_list,
                                         emb_model_list] + embedding_total_params,[status], show_progress=True)
-    emptymodelBtn0.click(parallel_local_model.clear, inputs=[switch_chatbot,status],outputs=[doc1, emb_api_list, emb_model_list,status])
+    emptymodelBtn0.click(parallel_local_model.clear, inputs=[switch_chatbot,status],outputs=[doc1, emb_api_list, emb_model_list, status])
 
     emb_api_list.change(emb_api_select, inputs=[emb_api_list, emb_model_list],
                         outputs=[emb_openai_params, emb_azure_openai_params, emb_api_list, emb_model_list])
 
     total_params = [prompt, openai_api_key, openai_port, openai_api_base, openai_api_model, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
-                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed]
+                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed, claude_cookies]
 
     history = gr.State([])
 
@@ -767,12 +779,14 @@ def chat_page(localizer):
 
 
     Refresh.click(refresh_directories, outputs=[model_list, lora_list])
+
+    save.click(chat_model.reset_state_claude,[chatbot, history, user_input], outputs=[
+                   chatbot, history, user_input])    
     save.click(load_params, [api_list, model_list, lora_list]+total_params,
                outputs=[user_input, submitGroup], show_progress=True)
 
     parallel_local_model_total_params = [parallel_local_model_prompt, openai_api_key, openai_port, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
                     ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, parallel_local_model_quantization, parallel_local_model_max_length, parallel_local_model_top_p, parallel_local_model_temperature, parallel_local_model_use_deepspeed]
-
 
 
     parallel_local_model_save.click(load_params, [parallel_local_model_model_list, parallel_local_model_model_list, parallel_local_model_lora_list]+parallel_local_model_total_params,
@@ -781,15 +795,15 @@ def chat_page(localizer):
     submitBtn.click(chat_model.predict, [user_input, chatbot, history, stream, net, search, search_key, result_len, prompt], [
                     chatbot, history, user_input], show_progress=True)
 
-    emptyBtn.click(chat_model.reset_state, outputs=[
-                   chatbot, history, user_input])
+    emptyBtn.click(chat_model.reset_state, total_params, outputs=[chatbot, history, user_input])
+
     emptymodelBtn.click(chat_model.clear, outputs=[
                         chatbot, history, user_input, api_list, model_list, lora_list, submitGroup])
 
     model_list.change(model_select, inputs=[api_list, model_list, lora_list], outputs=[
                       api_list, model_list, lora_list])
     api_list.change(api_select, inputs=[api_list, model_list, lora_list], outputs=[
-                    openai_params, azure_openai_params, ernie_bot_params, ernie_bot_turbo_params, chatglm_params, spark_params, ali_params, api_list, model_list, lora_list])
+                    openai_params, azure_openai_params, ernie_bot_params, ernie_bot_turbo_params, chatglm_params, spark_params, ali_params, claude_params, api_list, model_list, lora_list])
 
     # API并行调用页面
     api_total_params = [api_openai_api_key, api_openai_port, api_openai_api_base, api_openai_api_model, api_azure_api_key, api_azure_endpoint, api_azure_engine, api_ernie_api_key, api_ernie_secret_key, api_ernie_temperature, api_ernie_top_p, api_ernie_penalty_score, api_ernie_turbo_api_key,

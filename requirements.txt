@@ -56,3 +56,4 @@ dashscope
 bitsandbytes
 commentjson
 zhipuai
+curl_cffi
