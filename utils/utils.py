@@ -73,11 +73,18 @@ def copy_custom_files(source, target):
         shutil.copy(os.path.join(source, "configuration_internlm.py"), target)
         shutil.copy(os.path.join(source, "modeling_internlm.py"), target)
         shutil.copy(os.path.join(source, "tokenization_internlm.py"), target)
-    elif "Qwen-7B-Chat" == model_name:
+    elif (
+        "Qwen-7B-Chat" == model_name or
+        "Qwen-14B-Chat" == model_name
+    ):
         shutil.copy(os.path.join(source, "configuration_qwen.py"), target)
         shutil.copy(os.path.join(source, "modeling_qwen.py"), target)
         shutil.copy(os.path.join(source, "tokenization_qwen.py"), target)
         shutil.copy(os.path.join(source, "qwen_generation_utils.py"), target)
+        shutil.copy(os.path.join(source, "cache_autogptq_cuda_256.cpp"), target)
+        shutil.copy(os.path.join(source, "cache_autogptq_cuda_kernel_256.cu"), target)
+        shutil.copy(os.path.join(source, "configuration.json"), target)
+        shutil.copy(os.path.join(source, "cpp_kernels.py"), target)
     else:
         raise NotImplementedError("Model is not implemented.")
 
@@ -258,7 +265,10 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             quantization_config=quantization_config,  
             torch_dtype=data_type,
             )
-    elif "Qwen-7B-Chat" == model_name:
+    elif (
+        "Qwen-7B-Chat" == model_name or
+        "Qwen-14B-Chat" == model_name
+    ):
         config = AutoConfig.from_pretrained(path, cache_dir="./", trust_remote_code=True)
         if dtype == 'fp16':
             config.fp16 = True
@@ -278,7 +288,7 @@ def get_model_tokenizer(path, use_8bit=False, use_4bit=False, max_length=1024, u
             config.update({"max_position_embeddings": max_length})
         tokenizer = AutoTokenizer.from_pretrained(
             path, cache_dir="./", trust_remote_code=True, 
-            pad_token="<|endoftext|>", eos_token="<|im_end|>", bos_token="<|im_start|>"
+            pad_token="<|im_end|>", eos_token="<|im_end|>"
         )
         model = AutoModelForCausalLM.from_pretrained(
             path, config=config, device_map=device_map, load_in_8bit=use_8bit, 
@@ -313,7 +323,10 @@ def get_lora_model(model, path, lora_rank, checkpoint):
         target_modules = ["W_pack"]
     elif "internlm-chat-7b-8k" == model_name:
         target_modules = ["q_proj", "k_proj"]
-    elif "Qwen-7B-Chat" == model_name:
+    elif (
+        "Qwen-7B-Chat" == model_name or
+        "Qwen-14B-Chat" == model_name
+    ):
         target_modules = ["c_attn"]
     else:
         raise NotImplementedError("Model is not implemented.")
@@ -359,7 +372,10 @@ def get_preprocess_datacollator(path):
         return preprocess_4_internlm, data_collator_4_internlm
     elif "chinese-alpaca-2-7b" == model_name:
         return preprocess_4_chinese_alpaca_2, data_collator_4_chinese_alpaca_2
-    elif "Qwen-7B-Chat" == model_name:
+    elif (
+        "Qwen-7B-Chat" == model_name or
+        "Qwen-14B-Chat" == model_name
+    ):
         return preprocess_4_qwen, data_collator_4_qwen
     else:
         raise NotImplementedError("Model is not implemented.")
@@ -401,7 +417,11 @@ def build_query(path, tokenizer, question, history):
             query += "[Round {}]\n\n问：{}\n\n答：{}{}".format(round, q, a, tokenizer.eos_token)
             round += 1
         query += "[Round {}]\n\n问：{}\n\n答：".format(round, question)
-    elif "Qwen-7B-Chat" == model_name:
+    elif (
+        "Qwen-7B-Chat" == model_name or
+        "Qwen-14B-Chat" == model_name
+    ):
+        query += "<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n"
         for q, a in history:
             query += "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n{}<|im_end|>\n".format(q, a)
         query += "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n".format(question)

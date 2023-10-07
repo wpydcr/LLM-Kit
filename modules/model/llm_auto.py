@@ -70,7 +70,7 @@ class AutoLM(LLM):
                     else:
                         history[-1] = [prompt, stream_resp]
                     yield stream_resp, history
-            elif "Qwen-7B-Chat" == self.model_name:
+            elif "Qwen-7B-Chat" == self.model_name or "Qwen-14B-Chat" == self.model_name:
                 if self.use_deepspeed:
                     stream_chat = self.model.module.chat_stream
                 else:
@@ -126,7 +126,7 @@ class AutoLM(LLM):
                     **chatglm_gen_config,
                     generation_config=generation_config
                 )
-            elif "Qwen-7B-Chat" == self.model_name:
+            elif "Qwen-7B-Chat" == self.model_name or "Qwen-14B-Chat" == self.model_name:
                 if self.use_deepspeed:
                     chat = self.model.module.chat
                 else:

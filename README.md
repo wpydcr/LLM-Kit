@@ -108,6 +108,7 @@ $ pip install -r requirements.txt
   - [x] [internlm-chat-7b-8k](https://huggingface.co/internlm/internlm-chat-7b-8k)
   - [x] [chinese-alpaca-2-7b(llama2)](https://huggingface.co/ziqingyang/chinese-alpaca-2-7b)
   - [x] [Qwen-7B-Chat](https://huggingface.co/Qwen/Qwen-7B-Chat)
+  - [x] [Qwen-14B-Chat](https://huggingface.co/Qwen/Qwen-14B-Chat)
   - [x] [Baichuan2-7B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-7B-Chat)  
   - [x] [Baichuan2-13B-Chat](https://huggingface.co/baichuan-inc/Baichuan2-13B-Chat)
 - [ ] 多模态大模型(推理)
