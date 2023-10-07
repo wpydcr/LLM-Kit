@@ -83,7 +83,6 @@ def copy_custom_files(source, target):
         shutil.copy(os.path.join(source, "qwen_generation_utils.py"), target)
         shutil.copy(os.path.join(source, "cache_autogptq_cuda_256.cpp"), target)
         shutil.copy(os.path.join(source, "cache_autogptq_cuda_kernel_256.cu"), target)
-        shutil.copy(os.path.join(source, "configuration.json"), target)
         shutil.copy(os.path.join(source, "cpp_kernels.py"), target)
     else:
         raise NotImplementedError("Model is not implemented.")
