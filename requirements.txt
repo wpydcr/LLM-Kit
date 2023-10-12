@@ -1,4 +1,4 @@
-accelerate==0.20.3
+accelerate==0.23.0
 cpm_kernels==1.0.11
 datasets==2.8.0
 gradio==3.35.2
