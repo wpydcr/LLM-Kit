@@ -187,6 +187,9 @@ $ pip install -r requirements.txt
 ### [吴平宇 @君材数云](https://github.com/wpydcr)
 发起人，负责整体项目架构和技术规划
 
+### [祝凌瑶 @浙江万里学院](https://github.com/wpydcr)
+负责大模型Agent研究
+
 ### [廖文彬 @中科院计算技术研究所](https://github.com/set-path)
 负责gradio，图向量数据库，Mysql数据库，api接口集成等python开发
 
