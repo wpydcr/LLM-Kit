@@ -198,12 +198,6 @@ Responsible for python development for graph vector database, live2D, vits, svc,
 ### [李璟辉](https://github.com/JaheimLee)
 Responsible for back-end development of LLM training and inference
 
-### [李禹含 @灵境赛博](https://github.com/liyuhan3035)
-Responsible for prompt engineering, embedding model validation and inference back-end development.
-
-### [从灿](https://github.com/Alan-2018) 
-Responsible for back-end development of embedded model training
-
 
 ---
 
