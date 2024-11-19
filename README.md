@@ -196,12 +196,6 @@ $ pip install -r requirements.txt
 ### [李璟辉](https://github.com/JaheimLee)
 负责大模型训练与推理的后端代码开发
 
-### [李禹含 @灵境赛博](https://github.com/liyuhan3035)
-负责提示词，嵌入模型验证和推理的后端代码开发
-
-### [从灿](https://github.com/Alan-2018)
-负责嵌入模型训练的后端代码开发
-
 ---
 
 ## 项目招募
