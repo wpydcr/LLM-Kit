@@ -14,7 +14,7 @@
 ---
 ## 开发部署
 
-初次使用建议查阅[说明文档](https://www.yuque.com/setpath/llm-kit)进行相关操作
+初次使用建议查阅[说明文档](https://www.yuque.com/setpath/pkqy22?#)进行相关操作
 
 ### 软件需求
 本项目已在 Python 3.8 - 3.10，CUDA 11.7/11.8 环境下完成测试。已在 Windows、Linux 系统中完成测试。
