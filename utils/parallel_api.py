@@ -133,7 +133,7 @@ class Parallel_api(object):
         if 'ali api' in params['api_list']:
             api_params = {
                 'name': 'ali api',
-                'api_key': params['ali_api_key'],
+                'api_key': params['qwen_api_key'],
                 'top_p': params['ali_top_p'],
                 'top_k': params['ali_top_k'],
                 'kuake_search': params['ali_kuake_search']

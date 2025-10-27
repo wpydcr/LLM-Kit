@@ -318,7 +318,7 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
         returns.append(gr.update(visible=False))
     if 'ali api' in api_api_list:
         params['api_list'].append('ali api')
-        params['ali_api_key'] = args[25]
+        params['qwen_api_key'] = args[25]
         params['ali_top_p'] = args[26]
         params['ali_top_k'] = args[27]
         params['ali_kuake_search'] = args[28]
@@ -444,7 +444,7 @@ def chat_page(localizer):
                             spark_max_tokens = gr.Slider(
                                 0, 4096, value=2048, step=256, label="Maximum tokens", interactive=True)
                         with gr.Accordion(localizer("ali api参数"), open=True, visible=False) as ali_params:
-                            ali_api_key = gr.Textbox(
+                            qwen_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                             ali_top_p = gr.Slider(
                                 0, 1, value=0.8, step=0.05, label="Top p", interactive=True, elem_id='chat_ali_top_p')
@@ -602,7 +602,7 @@ def chat_page(localizer):
                         api_spark_max_tokens = gr.Slider(
                             0, 4096, value=2048, step=256, label="Maximum tokens", interactive=True)
                     with gr.Accordion(localizer("ali api参数"), open=False, visible=False) as api_ali_params:
-                        api_ali_api_key = gr.Textbox(
+                        api_qwen_api_key = gr.Textbox(
                             lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                         api_ali_top_p = gr.Slider(
                             0, 1, value=0.8, step=0.05, label="Top p", interactive=True, elem_id='chat_ali_top_p')
@@ -756,7 +756,7 @@ def chat_page(localizer):
                         outputs=[emb_openai_params, emb_azure_openai_params, emb_api_list, emb_model_list])
 
     total_params = [prompt, openai_api_key, openai_port, openai_api_base, openai_api_model, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
-                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed, claude_cookies]
+                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, qwen_api_key, ali_top_p, ali_top_k, ali_kuake_search, quantization, max_length, top_p, temperature, use_deepspeed, claude_cookies]
 
     history = gr.State([])
 
@@ -786,7 +786,7 @@ def chat_page(localizer):
                outputs=[user_input, submitGroup], show_progress=True)
 
     parallel_local_model_total_params = [parallel_local_model_prompt, openai_api_key, openai_port, azure_api_key, azure_endpoint, azure_engine, ernie_api_key, ernie_secret_key, ernie_temperature, ernie_top_p, ernie_penalty_score, ernie_turbo_api_key,
-                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, ali_api_key, ali_top_p, ali_top_k, ali_kuake_search, parallel_local_model_quantization, parallel_local_model_max_length, parallel_local_model_top_p, parallel_local_model_temperature, parallel_local_model_use_deepspeed]
+                    ernie_turbo_secret_key, chatglm_api_key, chatglm_temperature, chatglm_top_p, chatglm_type, spark_appid, spark_api_key, spark_secret_key, spark_api_version, spark_temperature, spark_top_k, spark_max_tokens, qwen_api_key, ali_top_p, ali_top_k, ali_kuake_search, parallel_local_model_quantization, parallel_local_model_max_length, parallel_local_model_top_p, parallel_local_model_temperature, parallel_local_model_use_deepspeed]
 
 
     parallel_local_model_save.click(load_params, [parallel_local_model_model_list, parallel_local_model_model_list, parallel_local_model_lora_list]+parallel_local_model_total_params,
@@ -807,7 +807,7 @@ def chat_page(localizer):
 
     # API并行调用页面
     api_total_params = [api_openai_api_key, api_openai_port, api_openai_api_base, api_openai_api_model, api_azure_api_key, api_azure_endpoint, api_azure_engine, api_ernie_api_key, api_ernie_secret_key, api_ernie_temperature, api_ernie_top_p, api_ernie_penalty_score, api_ernie_turbo_api_key,
-                        api_ernie_turbo_secret_key, api_chatglm_api_key, api_chatglm_temperature, api_chatglm_top_p, api_chatglm_type, api_spark_appid, api_spark_api_key, api_spark_secret_key, api_spark_api_version, api_spark_temperature, api_spark_top_k, api_spark_max_tokens, api_ali_api_key, api_ali_top_p, api_ali_top_k, api_ali_kuake_search]
+                        api_ernie_turbo_secret_key, api_chatglm_api_key, api_chatglm_temperature, api_chatglm_top_p, api_chatglm_type, api_spark_appid, api_spark_api_key, api_spark_secret_key, api_spark_api_version, api_spark_temperature, api_spark_top_k, api_spark_max_tokens, api_qwen_api_key, api_ali_top_p, api_ali_top_k, api_ali_kuake_search]
     api_embed_total_params = [api_embedding_openai_api_key, api_embedding_openai_port,api_embedding_openai_api_base, api_embedding_openai_api_model,
                               api_embedding_azure_api_key, api_embedding_azure_endpoint, api_embedding_azure_engine]
     api_api_list.change(show_api_params_add_api, inputs=[api_api_list], outputs=[api_openai_params, api_azure_openai_params,

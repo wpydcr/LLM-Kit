@@ -39,7 +39,7 @@ def get_ernie_access_token(API_Key, Secret_Key):
         return None
 
 
-class ali_api():
+class qwen_api():
     def __init__(self):
         self.history = ChatMessageHistory()
 

@@ -359,7 +359,7 @@ def apply_knowledge(localizer):
                             faiss_spark_max_tokens = gr.Slider(
                                 0, 4096, value=2048, step=256, label="Maximum tokens", interactive=True)
                         with gr.Accordion(localizer("ali api参数"), open=True, visible=False) as faiss_ali_params:
-                            faiss_ali_api_key = gr.Textbox(
+                            faiss_qwen_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                             faiss_ali_top_p = gr.Slider(
                                 0, 1, value=0.8, step=0.05, label="Top p", interactive=True,elem_id='chat_ali_top_p')
@@ -485,7 +485,7 @@ def apply_knowledge(localizer):
                             mysql_spark_max_tokens = gr.Slider(
                                 0, 4096, value=2048, step=256, label="Maximum tokens", interactive=True)
                         with gr.Accordion(localizer("ali api参数"), open=True, visible=False) as mysql_ali_params:
-                            mysql_ali_api_key = gr.Textbox(
+                            mysql_qwen_api_key = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*api_key:", type='password')
                             mysql_ali_top_p = gr.Slider(
                                 0, 1, value=0.8, step=0.05, label="Top p", interactive=True,elem_id='chat_ali_top_p')
@@ -522,7 +522,7 @@ def apply_knowledge(localizer):
 
 
     # FAISS
-    fasiss_total_params = [faiss_openai_api_key, faiss_openai_port, faiss_openai_api_base, faiss_openai_api_model, faiss_azure_api_key, faiss_azure_endpoint, faiss_azure_engine, faiss_ernie_api_key, faiss_ernie_secret_key, faiss_ernie_temperature, faiss_ernie_top_p, faiss_ernie_penalty_score, faiss_ernie_turbo_api_key, faiss_ernie_turbo_secret_key, faiss_chatglm_api_key, faiss_chatglm_temperature, faiss_chatglm_top_p, faiss_chatglm_type, faiss_spark_appid, faiss_spark_api_key, faiss_spark_secret_key, faiss_spark_api_version, faiss_spark_temperature, faiss_spark_top_k, faiss_spark_max_tokens,faiss_ali_api_key,faiss_ali_top_p,faiss_ali_top_k,faiss_ali_kuake_search,faiss_quantization,faiss_max_length,faiss_top_p,faiss_temperature,faiss_use_deepspeed]
+    fasiss_total_params = [faiss_openai_api_key, faiss_openai_port, faiss_openai_api_base, faiss_openai_api_model, faiss_azure_api_key, faiss_azure_endpoint, faiss_azure_engine, faiss_ernie_api_key, faiss_ernie_secret_key, faiss_ernie_temperature, faiss_ernie_top_p, faiss_ernie_penalty_score, faiss_ernie_turbo_api_key, faiss_ernie_turbo_secret_key, faiss_chatglm_api_key, faiss_chatglm_temperature, faiss_chatglm_top_p, faiss_chatglm_type, faiss_spark_appid, faiss_spark_api_key, faiss_spark_secret_key, faiss_spark_api_version, faiss_spark_temperature, faiss_spark_top_k, faiss_spark_max_tokens,faiss_qwen_api_key,faiss_ali_top_p,faiss_ali_top_k,faiss_ali_kuake_search,faiss_quantization,faiss_max_length,faiss_top_p,faiss_temperature,faiss_use_deepspeed]
     embedding_total_params = [embedding_openai_api_key, embedding_openai_port, embedding_openai_api_base, embedding_openai_api_model, embedding_azure_api_key, embedding_azure_endpoint, embedding_azure_engine]
     faiss_Refresh.click(refresh_directories_faiss, outputs=[faiss_model_list,faiss_lora_list,doc1,emb_model_list])
     faiss_save.click(load_faiss_params, [faiss_api_list,faiss_model_list,faiss_lora_list]+fasiss_total_params, [faiss_user_input,faiss_submitGroup],show_progress=True)
@@ -541,7 +541,7 @@ def apply_knowledge(localizer):
     emb_api_list.change(emb_api_select, inputs=[emb_api_list,emb_model_list], outputs=[emb_openai_params,emb_azure_openai_params,emb_api_list,emb_model_list])
 
     # # MySQL
-    mysql_total_params = [mysql_openai_api_key, mysql_openai_port, mysql_openai_api_base, mysql_openai_api_model, mysql_azure_api_key, mysql_azure_endpoint, mysql_azure_engine, mysql_ernie_api_key, mysql_ernie_secret_key, mysql_ernie_temperature, mysql_ernie_top_p, mysql_ernie_penalty_score, mysql_ernie_turbo_api_key, mysql_ernie_turbo_secret_key, mysql_chatglm_api_key, mysql_chatglm_temperature, mysql_chatglm_top_p, mysql_chatglm_type, mysql_spark_appid, mysql_spark_api_key, mysql_spark_secret_key, mysql_spark_api_version, mysql_spark_temperature, mysql_spark_top_k, mysql_spark_max_tokens,mysql_ali_api_key,mysql_ali_top_p,mysql_ali_top_k,mysql_ali_kuake_search,mysql_quantization,mysql_max_length,mysql_top_p,mysql_temperature,mysql_use_deepspeed]
+    mysql_total_params = [mysql_openai_api_key, mysql_openai_port, mysql_openai_api_base, mysql_openai_api_model, mysql_azure_api_key, mysql_azure_endpoint, mysql_azure_engine, mysql_ernie_api_key, mysql_ernie_secret_key, mysql_ernie_temperature, mysql_ernie_top_p, mysql_ernie_penalty_score, mysql_ernie_turbo_api_key, mysql_ernie_turbo_secret_key, mysql_chatglm_api_key, mysql_chatglm_temperature, mysql_chatglm_top_p, mysql_chatglm_type, mysql_spark_appid, mysql_spark_api_key, mysql_spark_secret_key, mysql_spark_api_version, mysql_spark_temperature, mysql_spark_top_k, mysql_spark_max_tokens,mysql_qwen_api_key,mysql_ali_top_p,mysql_ali_top_k,mysql_ali_kuake_search,mysql_quantization,mysql_max_length,mysql_top_p,mysql_temperature,mysql_use_deepspeed]
     connect.click(get_databases, inputs=[host,user,password,port],outputs=[doc0])
     mysql_Refresh.click(refresh_directories_mysql, outputs=[mysql_model_list])
     mysql_save.click(load_mysql_params, [mysql_api_list,mysql_model_list]+mysql_total_params, [mysql_user_input,mysql_submitGroup],show_progress=True)

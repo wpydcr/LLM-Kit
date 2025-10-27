@@ -738,7 +738,7 @@ class chat_base_api():
         elif api_type == 'spark api':
             self.llm = spark_api()
         elif api_type == 'ali api':
-            self.llm = ali_api()
+            self.llm = qwen_api()
         elif api_type == 'claude':
             self.llm = claude()
         else:
