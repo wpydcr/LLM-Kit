@@ -404,6 +404,168 @@ class spark_api():
         self.history = ChatMessageHistory()
 
 
+class aihubmix_api():
+    def __init__(self):
+        self.history = ChatMessageHistory()
+
+        self.url = "https://aihubmix.com/v1/chat/completions"
+        self.headers={
+            "Authorization": "Bearer {api_key}",  # Replace with the key you generated in AIhubmix
+            "APP-Code": "{app_code}",  # Replace with your 6-digit referral code
+            "Content-Type": "application/json"
+        }
+        self.data={  
+            "model": "gpt-4o",
+            "messages": []
+        }
+
+    def get_embedding(self):
+        pass
+
+    def setv(self, aihubmix_api_key=None, aihubmix_app_code=None):
+        if aihubmix_api_key == '':
+            return {
+                'status': -1,
+                'message': '请输入api key'
+            }
+        if aihubmix_app_code == '':
+            return {
+                'status': -1,
+                'message': '请输入app code'
+            }
+        self.api_key = aihubmix_api_key
+        self.app_code = aihubmix_app_code
+        return {
+            'status': 0,
+            'message': '设置成功'
+        }
+
+    def get_ones(self, message):
+        if type(message) == str:
+            message = message.replace("\n", " ")
+            message = p_generator.generate_aihubmix_prompt(message=message)
+        messages = message
+        try:
+            total_text = ''
+            for response in requests.post(self.url, headers=self.headers.replace('{api_key}', self.api_key).replace('{app_code}', self.app_code), json={'model': 'gpt-4o', 'messages': messages}):
+                if response['status'] == 0:
+                    text = response['message']
+                    total_text += text
+                elif response['status'] == -1:
+                    # print(response['message'])
+                    return {
+                        'status': -1,
+                        'message': response['message']
+                    }
+            return {
+                'status': 0,
+                'message': total_text
+            }
+        except Exception as e:
+            return {
+                'status': -1,
+                'message': str(e)
+            }
+
+    def get_ones_stream(self, message):
+        if type(message) == str:
+            message = message.replace("\n", " ")
+            message = p_generator.generate_aihubmix_prompt(message=message)
+        messages = message
+        try:
+            for response in requests.post(self.url, headers=self.headers.replace('{api_key}', self.api_key).replace('{app_code}', self.app_code), json={'model': 'gpt-4o', 'messages': messages}):
+                if response['status'] == 0:
+                    text = response['message']
+                    yield {
+                        'status': 0,
+                        'message': text
+                    }
+                elif response['status'] == -1:
+                    # print(response['message'])
+                    yield {
+                        'status': -1,
+                        'message': response['message']
+                    }
+                    break
+        except Exception as e:
+            yield {
+                'status': -1,
+                'message':  str(e)
+            }
+
+    def cut_memory(self):
+        if len(self.history.messages) == 0:
+            return {
+                'status': -1,
+                'message': '裁剪历史记录失败，历史记录为空'
+            }
+        for _ in range(2):
+            '''删除一轮对话'''
+            first = self.history.messages.pop(0)
+            print(f'删除上下文记忆: {first}')
+        return {
+            'status': 0,
+            'message': '裁剪历史记录成功'
+        }
+
+    def talk(self, message, stream=False):
+        message = message.replace("\n", " ")
+        messages = p_generator.generate_aihubmix_prompt(
+            message=message, history=self.history.messages)
+        if stream:
+            total_text = ''
+            try:
+                for response in requests.post(self.url, headers=self.headers.replace('{api_key}', self.api_key).replace('{app_code}', self.app_code), json={'model': 'gpt-4o', 'messages': messages}):
+                    if response['status'] == 0:
+                        text = response['message']
+                        total_text += text
+                        yield {
+                            'status': 0,
+                            'message': text
+                        }
+                    elif response['status'] == -1:
+                        # print(response['message'])
+                        yield {
+                            'status': -1,
+                            'message': response['message']
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_text)
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
+        else:
+            try:
+                total_text = ''
+                for response in requests.post(self.url, headers=self.headers.replace('{api_key}', self.api_key).replace('{app_code}', self.app_code), json={'model': 'gpt-4o', 'messages': messages}):
+                    if response['status'] == 0:
+                        text = response['message']
+                        total_text += text
+                    elif response['status'] == -1:
+                        # print(response['message'])
+                        yield {
+                            'status': -1,
+                            'message': response['message']
+                        }
+                        break
+                self.history.messages.append(message)
+                self.history.messages.append(total_text)
+                yield {
+                    'status': 0,
+                    'message': total_text
+                }
+            except Exception as e:
+                yield {
+                    'status': -1,
+                    'message': str(e)
+                }
+
+    def clear_history(self):
+        self.history = ChatMessageHistory()
+
 class chatglm_api():
     def __init__(self):
         self.history = ChatMessageHistory()

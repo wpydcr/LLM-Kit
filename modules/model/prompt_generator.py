@@ -45,3 +45,11 @@ class prompt_generator(object):
             for i,content in enumerate(history):
                 pre_history.append({'user': content} if i%2==0 else {'bot': content})
         return message,pre_history
+    
+    def generate_aihubmix_prompt(self,message='',history=None):
+        messages = []
+        if history is not None:
+            for i,content in enumerate(history):
+                messages.append({'role': 'user', 'content': content} if i%2==0 else {'role': 'assistant', 'content': content})
+        messages.append({'role': 'user', 'content': message})
+        return messages

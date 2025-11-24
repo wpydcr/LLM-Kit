@@ -30,7 +30,7 @@ chat_model = chat_base_model()
 parallel_api = Parallel_api()
 
 model_api = ['openai', 'azure openai', 'ernie bot',
-             'ernie bot turbo', 'chatglm api', 'spark api', 'ali api', 'claude']
+             'ernie bot turbo', 'chatglm api', 'spark api', 'ali api', 'claude', 'aihubmix']
 
 embedding_api = ['openai', 'azure openai']
 parallel_local_model = ParallelLocalModel()
@@ -105,6 +105,7 @@ def api_select(api, model, lora):
         return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(visible=False), gr.update(value=api), gr.update(value=None), gr.update(value=None)
     elif api == 'claude':
         return gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.update(value=api), gr.update(value=None), gr.update(value=None)
+    
     else:
         pass
 
@@ -114,7 +115,7 @@ def load_claude_params(api_list, model_list, lora_list,user_input, submitGroup, 
     return user_input, submitGroup
 
 def load_params(api_list, model_list, lora_list, *args):
-    apis = ['openai','azure openai','ernie bot', 'ernie bot turbo','chatglm api','spark api','ali api', 'claude']
+    apis = ['openai','azure openai','ernie bot', 'ernie bot turbo','chatglm api','spark api','ali api', 'claude', 'aihubmix']
     params = {}
     params['prompt'] = args[0]
     if api_list in apis:
@@ -164,6 +165,9 @@ def load_params(api_list, model_list, lora_list, *args):
         elif api_list == 'claude':    
             params['name'] = 'claude'
             params['cookie'] = args[35]
+        elif api_list == 'aihubmix':
+            params['aihubmix_api_key'] = args[36]
+            params['aihubmix_app_code'] = args[37]
         else:
             pass
         return chat_model.load_api_params(params)
@@ -206,6 +210,10 @@ def show_api_params_add_api(api_list):
     else:
         res.append(gr.update(visible=False))
     if 'ali api' in api_list:
+        res.append(gr.update(visible=True))
+    else:
+        res.append(gr.update(visible=False))
+    if 'aihubmix' in api_list:
         res.append(gr.update(visible=True))
     else:
         res.append(gr.update(visible=False))
@@ -327,6 +335,15 @@ def load_api_page_params(api_api_list, api_emb_api_list, api_emb_model_list, api
     else:
         returns.append(gr.update(visible=False))
         returns.append(gr.update(visible=False))
+    if 'aihubmix' in api_api_list:
+        params['api_list'].append('aihubmix')
+        params['aihubmix_api_key'] = args[36]
+        params['aihubmix_app_code'] = args[37]
+        returns.append(gr.update(visible=True,value=None))
+        returns.append(gr.update(visible=True if use_knowledge else False,value=None))
+    else:
+        returns.append(gr.update(visible=False))
+        returns.append(gr.update(visible=False))
     if use_knowledge:
         params['use_knowledge'] = True
         if api_emb_api_list is not None:
@@ -429,7 +446,7 @@ def chat_page(localizer):
                                 0, 1, value=0.8, step=0.05, label="Top P", interactive=True, elem_id='chat_chatglm_top_p')
                             chatglm_type = gr.Radio(
                                 ['lite', 'std', 'pro'], label=localizer("模型类型"), value='std')
-                        with gr.Accordion(localizer("spark api参数"), open=True, visible=False) as spark_params:
+                        with gr.Accordion(localizer("参数"), open=True, visible=False) as spark_params:
                             spark_appid = gr.Textbox(
                                 lines=1, placeholder="Write Here...", label="*appid:", type='password')
                             spark_api_key = gr.Textbox(
@@ -609,6 +626,12 @@ def chat_page(localizer):
                         api_ali_top_k = gr.Slider(
                             1, 100, value=100, step=1, label="Top k", interactive=True, elem_id='chat_ali_top_k')
                         api_ali_kuake_search = gr.Checkbox(label=localizer('联网搜索'))
+
+                    with gr.Accordion(localizer("aihubmix参数"), open=False, visible=False) as api_aihubmix_params:
+                        api_aphubmix_api_key = gr.Textbox(
+                            lines=1, placeholder="Write Here...", label="*api_key:", type='password')
+                        api_aihubmix_app_code = gr.Textbox(
+                            lines=1, placeholder="Write Here...", label="*app_code:", type='password')
 
                     api_selected_api = gr.Textbox(
                         label=localizer("已选择的模型"), lines=1, value=None, interactive=False)

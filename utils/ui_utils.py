@@ -741,6 +741,8 @@ class chat_base_api():
             self.llm = qwen_api()
         elif api_type == 'claude':
             self.llm = claude()
+        elif api_type == 'aihubmix':
+            self.llm = 'aihubmix'
         else:
             pass
 
@@ -789,6 +791,8 @@ class chat_base_api():
                           top_k=params['top_k'], kuake_search=params['kuake_search'])
         elif self.api_type == 'claude':
             response = self.llm.setv(cookie=params['cookie'])
+        elif self.api_type == 'aihubmix':
+            response = self.llm.setv(aihubmix_api_key=params['api_key'], aihubmix_app_code=params['app_code'])
         else:
             pass
         if response['status'] == -1:
@@ -821,7 +825,7 @@ class chat_base_model():
     def clear(self):
         if self.model_name is None:
             return [], [], '', gr.update(value=None), gr.update(value=None), gr.update(value=None), gr.update(visible=False)
-        elif self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude':
+        elif self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude' or self.model_name == 'aihubmix':
             self.model_name = ''
             self.llm.reset_state()
             self.llm = AutoLM()
@@ -848,7 +852,7 @@ class chat_base_model():
             return chatbot, history, user_input
     
     def reset_state(self, *args):
-        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude':
+        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude' or self.model_name == 'aihubmix':
             self.llm.reset_state()
             if self.model_name == 'claude':
                 params = {}
@@ -971,7 +975,7 @@ class chat_base_model():
                 doc_qa = doc
                 lo_doc, resp = doc_qa.get_similarity(input)
                 prompt = prompt + '\n' + lo_doc
-        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude':
+        if self.model_name == 'openai' or self.model_name == 'azure openai' or self.model_name == 'ernie bot' or self.model_name == 'ernie bot turbo' or self.model_name == 'chatglm api' or self.model_name == 'spark api' or self.model_name == 'ali api' or self.model_name == 'claude' or self.model_name == 'aihubmix':
             if self.model_name == 'openai' or self.model_name == 'azure openai':
                 self.llm.llm.charactor_prompt.content = prompt
             inputs = prompt+'\n'+input

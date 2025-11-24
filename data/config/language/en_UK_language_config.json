@@ -14,6 +14,7 @@
   "ernie bot turbo参数": "Ernie bot turbo Parameters",
   "chatglm参数": "chatglm Parameters",
   "spark api参数": "spark api Parameters",
+  "aihubmix参数": "aihubmix Parameters",
   "ali api参数": "ali api Parameters",
   "联网搜索": "Online Search",
   "量化方式(不支持Windows)": "Quantize Method (Windows support suspended)",
