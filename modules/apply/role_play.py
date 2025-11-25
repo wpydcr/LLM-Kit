@@ -233,7 +233,7 @@ class role_play():
                 if reply['status'] == -1:
                     raise gr.Error(reply['message'])
                 reply = reply['message']
-            elif self.model_use == 'ernie bot' or self.model_use == 'ernie bot turbo' or self.model_use == 'chatglm api' or self.model_use == 'spark api' or self.model_use == 'ali api':
+            elif self.model_use == 'ernie bot' or self.model_use == 'ernie bot turbo' or self.model_use == 'chatglm api' or self.model_use == 'spark api' or self.model_use == 'ali api' or self.model_use == 'aihubmix':
                 replys = self.llm.get_ones(message[0]+'\n'+message[1])
                 if reply['status'] == -1:
                     raise gr.Error(reply['message'])
@@ -312,7 +312,7 @@ class role_play():
             if replys['status'] == -1:
                 raise gr.Error(replys['message'])
             replys = replys['message']
-        elif self.model_use == 'ernie bot' or self.model_use == 'ernie bot turbo' or self.model_use == 'chatglm api' or self.model_use == 'spark api' or self.model_use == 'ali api':
+        elif self.model_use == 'ernie bot' or self.model_use == 'ernie bot turbo' or self.model_use == 'chatglm api' or self.model_use == 'spark api' or self.model_use == 'ali api' or self.model_use == 'aihubmix':
             replys = self.llm.get_ones('\n'.join([i.content for i in messages]))
             if replys['status'] == -1:
                 raise gr.Error(replys['message'])

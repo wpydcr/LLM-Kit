@@ -13,7 +13,7 @@ def create_chat_completion(messages, model=None, llm_name=None) -> str:
         try:
             if llm_name == 'openai' or llm_name == 'azure openai':
                 response = model.get_ones([SystemMessage(content=messages[0]['content']),HumanMessage(content=messages[1]['content'])])
-            elif llm_name == 'ernie bot' or llm_name == 'ernie bot turbo' or llm_name == 'chatglm api' or llm_name == 'spark api' or llm_name == 'ali api':
+            elif llm_name == 'ernie bot' or llm_name == 'ernie bot turbo' or llm_name == 'chatglm api' or llm_name == 'spark api' or llm_name == 'ali api' or llm_name == 'aihubmix':
                 response = model.get_ones(messages[0]['content']+'\n'+messages[1]['content'])
             else:
                 for response,_ in model._call(messages[0]['content']+'\n'+messages[1]['content'],history=[],streaming=False):
